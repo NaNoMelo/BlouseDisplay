@@ -1,75 +1,67 @@
 #include <Arduino.h>
 #include <FastLED.h>
+#include <BluetoothSerial.h>
 
 #define WIDTH 32
 #define HEIGHT 16
-#define DATA_PIN 23
+#define BOT_LED_PIN 23
+#define TOP_LED_PIN 22
 
 void matriceToLed();
 void rgbNext(int nb);
 void matriceRgb();
+void NaNoverlay();
 
-int vide[8][8] = {
-    {0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0}};
+int NaNo[8][25] = {
+    {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0},
+    {1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0},
+    {1, 0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0},
+    {1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 0},
+    {1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 1},
+    {1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1},
+    {1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1},
+    {1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0}};
 
-int N[8][8] = {
-    {0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 1, 0, 0, 0, 0, 1, 0},
-    {0, 1, 1, 0, 0, 0, 1, 0},
-    {0, 1, 0, 1, 0, 0, 1, 0},
-    {0, 1, 0, 0, 1, 0, 1, 0},
-    {0, 1, 0, 0, 0, 1, 1, 0},
-    {0, 1, 0, 0, 0, 0, 1, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0}};
+int a[6][5] = {
+    {0, 1, 1, 1, 0},
+    {0, 0, 0, 0, 1},
+    {0, 1, 1, 1, 1},
+    {1, 0, 0, 0, 1},
+    {1, 0, 0, 0, 1},
+    {0, 1, 1, 1, 1}};
 
-int a[8][8] = {
-    {0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 1, 1, 1, 0, 0, 0},
-    {0, 0, 0, 0, 0, 1, 0, 0},
-    {0, 0, 1, 1, 1, 1, 0, 0},
-    {0, 1, 0, 0, 0, 1, 0, 0},
-    {0, 1, 0, 0, 0, 1, 0, 0},
-    {0, 1, 1, 1, 1, 1, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0}};
+int o[5][5] = {
+    {0, 1, 1, 1, 0},
+    {1, 0, 0, 0, 1},
+    {1, 0, 0, 0, 1},
+    {1, 0, 0, 0, 1},
+    {0, 1, 1, 1, 0}};
 
-int o[8][8] = {
-    {0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 1, 1, 1, 0, 0, 0},
-    {0, 1, 0, 0, 0, 1, 0, 0},
-    {0, 1, 0, 0, 0, 1, 0, 0},
-    {0, 1, 0, 0, 0, 1, 0, 0},
-    {0, 0, 1, 1, 1, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0}};
+CRGB top[256];
+CRGB bot[256];
 
-CRGB leds[WIDTH * HEIGHT];
-
-int r = 255, g = 0, b = 0;
 int matrice[WIDTH][HEIGHT][3];
-int pr, pg, pb;
 void setup()
 {
-  FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, WIDTH * HEIGHT);
+  FastLED.addLeds<NEOPIXEL, TOP_LED_PIN>(top, 8 * 32);
+  FastLED.addLeds<NEOPIXEL, BOT_LED_PIN>(bot, 8 * 32);
   FastLED.setMaxPowerInVoltsAndMilliamps(5, 1000);
+  FastLED.setBrightness(64);
 }
 
+int r = 255, g = 0, b = 0;
+int pr, pg, pb;
 void loop()
 {
-  FastLED.setBrightness(127 /*map(analogRead(15), 0, 4095, 0, 255)*/);
+
   pr = r, pg = g, pb = b;
   matriceRgb();
+  NaNoverlay();
   matriceToLed();
   FastLED.show();
   r = pr, g = pg, b = pb;
   rgbNext(32);
-  delay(100);
+  delay(50);
 }
 
 void matriceRgb()
@@ -84,7 +76,7 @@ void matriceRgb()
       {
         if (x + y == i)
         {
-          matrice[x][y][0] = r, matrice[x][y][1] = g, matrice[x][y][2] = b;
+          matrice[x][y][0] = r / 4, matrice[x][y][1] = g / 4, matrice[x][y][2] = b / 4;
         }
       }
     }
@@ -102,31 +94,59 @@ void matriceToLed()
       {
         if (x % 2)
         {
-          leds[x * 8 - y + 15].r = matrice[x][y][0];
-          leds[x * 8 - y + 15].g = matrice[x][y][1];
-          leds[x * 8 - y + 15].b = matrice[x][y][2];
+          bot[x * 8 - y + 15].r = matrice[x][y][0];
+          bot[x * 8 - y + 15].g = matrice[x][y][1];
+          bot[x * 8 - y + 15].b = matrice[x][y][2];
         }
         else
         {
-          leds[x * 8 + y - 8].r = matrice[x][y][0];
-          leds[x * 8 + y - 8].g = matrice[x][y][1];
-          leds[x * 8 + y - 8].b = matrice[x][y][2];
+          bot[x * 8 + y - 8].r = matrice[x][y][0];
+          bot[x * 8 + y - 8].b = matrice[x][y][2];
+          bot[x * 8 + y - 8].g = matrice[x][y][1];
         }
       }
       else
       {
         if (x % 2)
         {
-          leds[511 - x * 8 - y].r = matrice[x][y][0];
-          leds[511 - x * 8 - y].g = matrice[x][y][1];
-          leds[511 - x * 8 - y].b = matrice[x][y][2];
+          top[x * 8 - y + 7].r = matrice[x][y][0];
+          top[x * 8 - y + 7].g = matrice[x][y][1];
+          top[x * 8 - y + 7].b = matrice[x][y][2];
         }
         else
         {
-          leds[504 - x * 8 + y].r = matrice[x][y][0];
-          leds[504 - x * 8 + y].g = matrice[x][y][1];
-          leds[504 - x * 8 + y].b = matrice[x][y][2];
+          top[x * 8 + y].r = matrice[x][y][0];
+          top[x * 8 + y].b = matrice[x][y][2];
+          top[x * 8 + y].g = matrice[x][y][1];
         }
+        // if (x % 2)
+        // {
+        //   top[255 - x * 8 - y].r = matrice[x][y][0];
+        //   top[255 - x * 8 - y].g = matrice[x][y][1];
+        //   top[255 - x * 8 - y].b = matrice[x][y][2];
+        // }
+        // else
+        // {
+        //   top[248 - x * 8 + y].r = matrice[x][y][0];
+        //   top[248 - x * 8 + y].g = matrice[x][y][1];
+        //   top[248 - x * 8 + y].b = matrice[x][y][2];
+        // }
+      }
+    }
+  }
+}
+
+void NaNoverlay()
+{
+  for (int x = 0; x < 25; x++)
+  {
+    for (int y = 0; y < 8; y++)
+    {
+      if (NaNo[y][x] == 1)
+      {
+        matrice[3 + x][4 + y][0] = 255;
+        matrice[3 + x][4 + y][1] = 255;
+        matrice[3 + x][4 + y][2] = 255;
       }
     }
   }
