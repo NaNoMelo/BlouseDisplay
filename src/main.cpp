@@ -7,7 +7,7 @@
 #include <BLE2902.h>
 #include <string.h>
 
-#define FORMAT 0
+#define FORMAT 1
 
 #define BUTTON_PIN 19
 
@@ -32,11 +32,13 @@ void rgbNext(int nb);
 void matriceRgb();
 void matrix();
 void fire();
-void NaNoverlay();
+void NaNoverlay(int originX, int originY);
 void overlayBuilder(bool pattern[], int width, int height, int xOffset, int yOffset);
 void buildMatrice();
+void nanoScroll();
 
 bool N[] = {
+#if FORMAT == 0
     1, 0, 0, 0, 0, 1,
     1, 0, 0, 0, 0, 1,
     1, 1, 0, 0, 0, 1,
@@ -44,7 +46,16 @@ bool N[] = {
     1, 0, 0, 1, 0, 1,
     1, 0, 0, 0, 1, 1,
     1, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 1}; // 6x8
+    1, 0, 0, 0, 0, 1 // 6x8
+#else
+    1, 0, 0, 0, 0, 1,
+    1, 1, 0, 0, 0, 1,
+    1, 0, 1, 0, 0, 1,
+    1, 0, 0, 1, 0, 1,
+    1, 0, 0, 0, 1, 1,
+    1, 0, 0, 0, 0, 1 // 6x6
+#endif
+};
 
 bool a[]{
     0, 1, 1, 1, 0,
@@ -97,14 +108,14 @@ void setup()
   srand(time(NULL));
   pinMode(BUTTON_PIN, INPUT_PULLUP);
   FastLED.setBrightness(8);
-  NaNoverlay();
+  NaNoverlay(3, 4);
 }
 
 int r = 255, g = 0, b = 0;
 int pr, pg, pb;
 int mode = 2;
 int timer = 1000;
-int hue = 0;
+long int counter;
 void loop()
 {
   if (!digitalRead(BUTTON_PIN))
@@ -115,30 +126,49 @@ void loop()
     while (!digitalRead(BUTTON_PIN))
       delay(100);
   }
-  switch (mode)
+  if (!(counter % timer))
   {
-  case 1:
-    pr = r, pg = g, pb = b;
-    matriceRgb();
-    r = pr, g = pg, b = pb;
-    rgbNext(4);
-    timer = 10;
-    break;
-  case 2:
-    matrix();
-    timer = 50;
-    break;
-  case 3:
-    fire();
-    timer = 50;
-    break;
-  default:
-    break;
+    switch (mode)
+    {
+    case 1:
+      timer = 1;
+      pr = r, pg = g, pb = b;
+      matriceRgb();
+      r = pr, g = pg, b = pb;
+      rgbNext(4);
+      break;
+    case 2:
+      timer = 5;
+      matrix();
+      break;
+    case 3:
+      timer = 5;
+      fire();
+      break;
+    default:
+      break;
+    }
   }
-  buildMatrice();
-  matriceToLed();
-  FastLED.show();
-  delay(timer);
+  if (FORMAT && !(counter % 10))
+  {
+    if (FORMAT)
+      for (int x = 0; x < WIDTH; x++)
+      {
+        for (int y = 0; y < HEIGHT; y++)
+        {
+          overlay[x][y][0] = 0, overlay[x][y][1] = 0, overlay[x][y][2] = 0;
+        }
+      }
+    nanoScroll();
+  }
+  if (!(counter % timer))
+  {
+    buildMatrice();
+    matriceToLed();
+    FastLED.show();
+  }
+  delay(10);
+  counter++;
 }
 
 void matriceRgb()
@@ -297,11 +327,11 @@ void overlayBuilder(bool pattern[], int width, int height, int xOffset, int yOff
 {
   for (int x = xOffset; x < xOffset + width; x++)
   {
-    if (x < WIDTH)
+    if (x < WIDTH && x >= 0)
     {
       for (int y = yOffset; y < yOffset + height; y++)
       {
-        if (y < HEIGHT)
+        if (y < HEIGHT && y >= 0)
         {
           if (pattern[(y - yOffset) * width + (x - xOffset)])
           {
@@ -321,31 +351,32 @@ void overlayBuilder(bool pattern[], int width, int height, int xOffset, int yOff
   }
 }
 
-#if FORMAT == 1
-int overlayState = 0;
-#endif
-void NaNoverlay()
+void NaNoverlay(int originX, int originY)
 {
-#if FORMAT == 0
-  int originX = 3;
-  int originY = 4;
+#if FORMAT == 1
+  overlayBuilder(N, 6, 6, originX, originY);
+  overlayBuilder(a, 5, 6, originX + 7, originY);
+  overlayBuilder(N, 6, 6, originX + 13, originY);
+  overlayBuilder(o, 5, 6, originX + 20, originY);
+#else
   overlayBuilder(N, 6, 8, originX, originY);
   overlayBuilder(a, 5, 6, originX + 7, originY + 2);
   overlayBuilder(N, 6, 8, originX + 13, originY);
   overlayBuilder(o, 5, 6, originX + 20, originY + 2);
 #endif
-#if FORMAT == 1
-  if (overlayState >= 25)
-    overlayState = 0;
-  for (int x = 0; x < WIDTH; x++)
-  {
-    for (int y = 0; y < HEIGHT; y++)
-    {
-    }
-  }
-  overlayState++;
-#endif
 }
+
+#if FORMAT == 1
+int overlayState = 0;
+void nanoScroll()
+{
+  if (overlayState <= 0)
+    overlayState = 35;
+  NaNoverlay(overlayState, 1);
+  NaNoverlay(overlayState - 35, 1);
+  overlayState--;
+}
+#endif
 
 void buildMatrice()
 {
