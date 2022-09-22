@@ -1,13 +1,8 @@
 #include <Arduino.h>
 #include <FastLED.h>
 #include <stdlib.h>
-#include <BLEDevice.h>
-#include <BLEUtils.h>
-#include <BLEServer.h>
-#include <BLE2902.h>
-#include <string.h>
 
-#define FORMAT 1
+#define FORMAT 0
 
 #define BUTTON_PIN 19
 
@@ -28,7 +23,6 @@ CRGB leds[128];
 #endif
 
 void matriceToLed();
-void rgbNext(int nb);
 void matriceRgb();
 void matrix();
 void fire();
@@ -73,25 +67,9 @@ bool o[]{
     1, 0, 0, 0, 1,
     0, 1, 1, 1, 0}; // 5x6
 
-unsigned char matrice[WIDTH][HEIGHT][3];
-unsigned char background[WIDTH][HEIGHT][3];
-unsigned char overlay[WIDTH][HEIGHT][3];
-
-/*bool deviceConnected = false;
-
-BLECharacteristic presetCharacteristics(CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_WRITE | BLECharacteristic::PROPERTY_READ);
-BLEDescriptor presetDescriptor(BLEUUID((uint16_t)0x2902));
-class MyServerCallbacks : public BLEServerCallbacks
-{
-  void onConnect(BLEServer *pServer)
-  {
-    deviceConnected = true;
-  };
-  void onDisconnect(BLEServer *pServer)
-  {
-    deviceConnected = false;
-  }
-};*/
+CRGB matrice[WIDTH][HEIGHT];
+CRGB background[WIDTH][HEIGHT];
+CRGB overlay[WIDTH][HEIGHT];
 
 void setup()
 {
@@ -107,14 +85,12 @@ void setup()
   FastLED.setMaxRefreshRate(0);
   srand(time(NULL));
   pinMode(BUTTON_PIN, INPUT_PULLUP);
-  FastLED.setBrightness(8);
+  FastLED.setBrightness(4);
   NaNoverlay(3, 4);
 }
 
-int r = 255, g = 0, b = 0;
-int pr, pg, pb;
 int mode = 2;
-int timer = 1000;
+int timer = 10;
 long int counter;
 void loop()
 {
@@ -126,16 +102,14 @@ void loop()
     while (!digitalRead(BUTTON_PIN))
       delay(100);
   }
+
   if (!(counter % timer))
   {
     switch (mode)
     {
     case 1:
       timer = 1;
-      pr = r, pg = g, pb = b;
       matriceRgb();
-      r = pr, g = pg, b = pb;
-      rgbNext(4);
       break;
     case 2:
       timer = 5;
@@ -149,6 +123,7 @@ void loop()
       break;
     }
   }
+
   if (FORMAT && !(counter % 10))
   {
     if (FORMAT)
@@ -156,7 +131,7 @@ void loop()
       {
         for (int y = 0; y < HEIGHT; y++)
         {
-          overlay[x][y][0] = 0, overlay[x][y][1] = 0, overlay[x][y][2] = 0;
+          overlay[x][y] = CRGB::Black;
         }
       }
     nanoScroll();
@@ -171,23 +146,17 @@ void loop()
   counter++;
 }
 
+short int hue = 0;
 void matriceRgb()
 {
-  int ir, ig, ib;
-  for (int i = 0; i < WIDTH + HEIGHT; i++)
+  for (int x = 0; x < WIDTH; x++)
   {
-    for (int x = 0; x < WIDTH; x++)
+    for (int y = 0; y < HEIGHT; y++)
     {
-      for (int y = 0; y < HEIGHT; y++)
-      {
-        if (x + y == i)
-        {
-          background[x][y][0] = r / 2, background[x][y][1] = g / 2, background[x][y][2] = b / 2;
-        }
-      }
+      background[x][y].setHSV(map(x + y + hue, 0, 4 * (WIDTH + HEIGHT), 0, 255), 255, 255) /= 2;
     }
-    rgbNext(8);
   }
+  hue += 1;
 }
 
 int alea;
@@ -197,23 +166,17 @@ void matrix()
   {
     for (int x = 0; x < WIDTH; x++)
     {
-      background[x][y][0] = background[x][y - 1][0];
-      background[x][y][1] = background[x][y - 1][1];
-      background[x][y][2] = background[x][y - 1][2];
+      background[x][y] = background[x][y - 1];
     }
   }
   for (int x = 0; x < WIDTH; x++)
   {
-    background[x][0][0] = 0;
-    background[x][0][1] = 0;
-    background[x][0][2] = 0;
+    background[x][0] = CRGB::Black;
   }
   for (int i = 0; i < (FORMAT ? 1 : 3); i++)
   {
     alea = rand() % WIDTH;
-    background[alea][0][0] = 0;
-    background[alea][0][1] = 255;
-    background[alea][0][2] = 0;
+    background[alea][0] = CRGB::Green;
   }
 }
 
@@ -239,23 +202,18 @@ void fire()
       break;
     }
   };
-  CRGB color;
+
   for (int x = 0; x < WIDTH; x++)
   {
     for (int y = 0; y < HEIGHT; y++)
     {
       if (y < etatFeu[x])
       {
-        background[x][y][0] = 0;
-        background[x][y][1] = 0;
-        background[x][y][2] = 0;
+        background[x][y] = CRGB::Black;
       }
       else
       {
-        color = CHSV(map(constrain(y - etatFeu[x], 0, HEIGHT - 1), 0, HEIGHT - 1, 0, 60), 255, 255);
-        background[x][y][0] = color.r;
-        background[x][y][1] = color.g;
-        background[x][y][2] = color.b;
+        background[x][y].setHSV(map(constrain(y - etatFeu[x], 0, HEIGHT - 1), 0, HEIGHT - 1, 0, 60), 255, 255);
       }
     }
   }
@@ -272,30 +230,22 @@ void matriceToLed()
       {
         if (x % 2)
         {
-          bot[x * 8 - y + 15].r = matrice[x][y][0];
-          bot[x * 8 - y + 15].g = matrice[x][y][1];
-          bot[x * 8 - y + 15].b = matrice[x][y][2];
+          bot[x * 8 - y + 15] = matrice[x][y];
         }
         else
         {
-          bot[x * 8 + y - 8].r = matrice[x][y][0];
-          bot[x * 8 + y - 8].g = matrice[x][y][1];
-          bot[x * 8 + y - 8].b = matrice[x][y][2];
+          bot[x * 8 + y - 8] = matrice[x][y];
         }
       }
       else
       {
         if (x % 2)
         {
-          top[x * 8 - y + 7].r = matrice[x][y][0];
-          top[x * 8 - y + 7].g = matrice[x][y][1];
-          top[x * 8 - y + 7].b = matrice[x][y][2];
+          top[x * 8 - y + 7] = matrice[x][y];
         }
         else
         {
-          top[x * 8 + y].r = matrice[x][y][0];
-          top[x * 8 + y].g = matrice[x][y][1];
-          top[x * 8 + y].b = matrice[x][y][2];
+          top[x * 8 + y] = matrice[x][y];
         }
       }
     }
@@ -308,15 +258,11 @@ void matriceToLed()
     {
       if (x % 2)
       {
-        leds[x * 8 - y + 7].r = matrice[x][y][0];
-        leds[x * 8 - y + 7].g = matrice[x][y][1];
-        leds[x * 8 - y + 7].b = matrice[x][y][2];
+        leds[x * 8 - y + 7] = matrice[x][y];
       }
       else
       {
-        leds[x * 8 + y].r = matrice[x][y][0];
-        leds[x * 8 + y].g = matrice[x][y][1];
-        leds[x * 8 + y].b = matrice[x][y][2];
+        leds[x * 8 + y] = matrice[x][y];
       }
     }
   }
@@ -335,15 +281,11 @@ void overlayBuilder(bool pattern[], int width, int height, int xOffset, int yOff
         {
           if (pattern[(y - yOffset) * width + (x - xOffset)])
           {
-            overlay[x][y][0] = 255;
-            overlay[x][y][1] = 255;
-            overlay[x][y][2] = 255;
+            overlay[x][y] = CRGB::White;
           }
           else
           {
-            overlay[x][y][0] = 0;
-            overlay[x][y][1] = 0;
-            overlay[x][y][2] = 0;
+            overlay[x][y] = CRGB::Black;
           }
         }
       }
@@ -386,38 +328,12 @@ void buildMatrice()
     {
       if (!overlay[x][y][0] && !overlay[x][y][1] && !overlay[x][y][2])
       {
-        matrice[x][y][0] = background[x][y][0];
-        matrice[x][y][1] = background[x][y][1];
-        matrice[x][y][2] = background[x][y][2];
+        matrice[x][y] = background[x][y];
       }
       else
       {
-        matrice[x][y][0] = overlay[x][y][0];
-        matrice[x][y][1] = overlay[x][y][1];
-        matrice[x][y][2] = overlay[x][y][2];
+        matrice[x][y] = overlay[x][y];
       }
-    }
-  }
-}
-
-void rgbNext(int nb)
-{
-  for (int i = 0; i < nb; i++)
-  {
-    if (r > 0 && b == 0)
-    {
-      r--;
-      g++;
-    }
-    if (g > 0 && r == 0)
-    {
-      g--;
-      b++;
-    }
-    if (b > 0 && g == 0)
-    {
-      r++;
-      b--;
     }
   }
 }
