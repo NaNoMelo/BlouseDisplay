@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <FastLED.h>
 #include <stdlib.h>
+#include <time.h>
 
 #define FORMAT 0
 
@@ -18,7 +19,7 @@ CRGB bot[256];
 #if FORMAT == 1
 #define WIDTH 16
 #define HEIGHT 8
-#define LED_PIN 12
+#define LED_PIN 2
 CRGB leds[128];
 #endif
 
@@ -85,7 +86,7 @@ void setup()
   FastLED.setMaxRefreshRate(0);
   srand(time(NULL));
   pinMode(BUTTON_PIN, INPUT_PULLUP);
-  FastLED.setBrightness(4);
+  FastLED.setBrightness(8);
   NaNoverlay(3, 4);
 }
 
