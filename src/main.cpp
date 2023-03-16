@@ -38,13 +38,13 @@ void setup()
 #if FORMAT == 0
   FastLED.addLeds<NEOPIXEL, TOP_LED_PIN>(top, 8 * 32);
   FastLED.addLeds<NEOPIXEL, BOT_LED_PIN>(bot, 8 * 32);
-  FastLED.setMaxPowerInVoltsAndMilliamps(5, 2000);
+  FastLED.setMaxPowerInVoltsAndMilliamps(5, 1000);
 #endif
 #if FORMAT == 1
   FastLED.addLeds<NEOPIXEL, LED_PIN>(leds, 8 * 16);
   FastLED.setMaxPowerInVoltsAndMilliamps(5, 1000);
 #endif
-  FastLED.setMaxRefreshRate(20);
+  FastLED.setMaxRefreshRate(30);
   FastLED.setBrightness(1);
   srand(time(NULL));
   pinMode(BG_BUTTON_PIN, INPUT_PULLUP);
@@ -83,7 +83,7 @@ void loop()
     {
     case 1:
       timer = 5;
-      matriceRgb(background);
+      matriceRgb(background, mode);
       break;
     case 2:
       timer = 5;

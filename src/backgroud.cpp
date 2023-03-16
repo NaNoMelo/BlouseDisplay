@@ -1,13 +1,16 @@
 #include "background.h"
 
-void matriceRgb(CRGB background[WIDTH][HEIGHT])
+void matriceRgb(CRGB background[WIDTH][HEIGHT], int mode)
 {
+    const CRGB rgb[] = {CRGB::Red, CRGB::Yellow, CRGB::Green, CRGB::Cyan, CRGB::Blue, CRGB::Magenta};
     static short int hue = 0;
     for (int x = 0; x < WIDTH; x++)
     {
         for (int y = 0; y < HEIGHT; y++)
         {
-            background[x][y].setHSV(map(x + y + hue, 0, 4 * (WIDTH + HEIGHT), 0, 255), 255, 255) /= 2;
+            mode
+                ? background[x][y].setHSV(map(x + y + hue, 0, 4 * (WIDTH + HEIGHT), 0, 255), 255, 255)
+                : background[x][y] = rgb[map(x + y + hue, 0, 4 * (WIDTH + HEIGHT), 0, 6)];
         }
     }
     hue += 1;
