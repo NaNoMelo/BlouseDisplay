@@ -9,8 +9,8 @@ void matriceRgb(CRGB background[WIDTH][HEIGHT], int mode)
         for (int y = 0; y < HEIGHT; y++)
         {
             mode
-                ? background[x][y].setHSV(map(x + y + hue, 0, 4 * (WIDTH + HEIGHT), 0, 255), 255, 255)
-                : background[x][y] = rgb[map(x + y + hue, 0, 4 * (WIDTH + HEIGHT), 0, 6)];
+                ? background[x][y] = rgb[(hue + x + y) / 16 % 6]
+                : background[x][y].setHSV(map(x + y + hue, 0, 4 * (WIDTH + HEIGHT), 0, 255), 255, 255);
         }
     }
     hue += 1;
@@ -74,4 +74,19 @@ void fire(CRGB background[WIDTH][HEIGHT])
             }
         }
     }
+}
+
+void epilepsie(CRGB background[WIDTH][HEIGHT])
+{
+    static int hue = 0;
+    const CRGB rgb[] = {CRGB::Red, CRGB::Yellow, CRGB::Green, CRGB::Cyan, CRGB::Blue, CRGB::Magenta};
+    static int randEpi[WIDTH][HEIGHT];
+    for (int x = 0; x < WIDTH; x++)
+    {
+        for (int y = 0; y < HEIGHT; y++)
+        {
+            background[x][y] = rgb[hue % 6];
+        }
+    }
+    hue++;
 }

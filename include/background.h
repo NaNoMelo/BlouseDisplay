@@ -18,5 +18,6 @@
 void matriceRgb(CRGB background[WIDTH][HEIGHT], int mode);
 void matrix(CRGB background[WIDTH][HEIGHT]);
 void fire(CRGB background[WIDTH][HEIGHT]);
+void epilepsie(CRGB background[WIDTH][HEIGHT]);
 
 #endif // BLOUSEDISPLAY_BACKGROUND_H
