@@ -4,6 +4,9 @@
 #include <time.h>
 #include "overlay.h"
 #include "background.h"
+#include <Preferences.h>
+
+Preferences preferences;
 
 #define FORMAT 0
 
@@ -26,7 +29,7 @@ CRGB bot[256];
 CRGB leds[128];
 #endif
 
-void matriceToLed(int mode);
+void matriceToLed();
 void buildMatrice();
 
 CRGB matrice[WIDTH][HEIGHT];
@@ -35,6 +38,8 @@ CRGB overlay[WIDTH][HEIGHT];
 
 void setup()
 {
+  Serial.begin(115200);
+  preferences.begin("display");
 #if FORMAT == 0
   FastLED.addLeds<NEOPIXEL, TOP_LED_PIN>(top, 8 * 32);
   FastLED.addLeds<NEOPIXEL, BOT_LED_PIN>(bot, 8 * 32);
@@ -54,44 +59,65 @@ void setup()
 
 void loop()
 {
-  static int bg = 2;
-  static int mode = 1;
-  static int timer = 10;
-  static long int counter = 0;
+  static short bg = preferences.getShort("bg", 2);
+  static short brightness = preferences.getShort("brightness", 1);
+  static long counter = 0;
+  static bool button_bg = false;
+  static bool button_brightness = false;
   if (!digitalRead(BG_BUTTON_PIN))
   {
-    bg++;
-    if (bg > 3)
-      bg = 1;
-    while (!digitalRead(BG_BUTTON_PIN))
-      delay(100);
+    if (!button_bg)
+    {
+      button_bg = true;
+      bg++;
+      if (bg > 4)
+        bg = 1;
+    }
+  }
+  else
+  {
+    if (button_bg)
+    {
+      preferences.putShort("bg", bg);
+      button_bg = false;
+    }
   }
 
   if (!digitalRead(MODE_BUTTON_PIN))
   {
-    mode++;
-    if (mode > 1)
-      mode = 0;
-    mode ? FastLED.setBrightness(1) : FastLED.setBrightness(16);
-    while (!digitalRead(MODE_BUTTON_PIN))
-      delay(100);
+    if (!button_brightness)
+    {
+      button_brightness = true;
+      brightness++;
+      if (brightness > 1)
+        brightness = 0;
+    }
   }
+  else
+  {
+    if (button_brightness)
+    {
+      preferences.putShort("brightness", brightness);
+      button_brightness = false;
+    }
+  }
+  brightness ? FastLED.setBrightness(1) : FastLED.setBrightness(16);
 
-  if (!(counter % timer))
+  if (!(counter % 5))
   {
     switch (bg)
     {
     case 1:
-      timer = 5;
-      matriceRgb(background, mode);
+      matriceRgb(background, brightness);
       break;
     case 2:
-      timer = 5;
       matrix(background);
       break;
     case 3:
-      timer = 5;
       fire(background);
+      break;
+    case 4:
+      epilepsie(background);
       break;
     default:
       break;
@@ -115,7 +141,7 @@ void loop()
   if (!(counter % 5))
   {
     buildMatrice();
-    matriceToLed(mode);
+    matriceToLed();
     FastLED.show();
   }
   delay(10);
@@ -140,7 +166,7 @@ void buildMatrice()
   }
 }
 
-void matriceToLed(int mode)
+void matriceToLed()
 {
   CRGB color;
   for (int x = 0; x < WIDTH; x++)
@@ -148,7 +174,6 @@ void matriceToLed(int mode)
     for (int y = 0; y < HEIGHT; y++)
     {
       color = matrice[x][y];
-      // color /= mode ? 17 : 85;
 #if FORMAT == 0
       if (y >= 8)
       {
