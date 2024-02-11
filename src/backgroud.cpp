@@ -2,7 +2,7 @@
 
 void matriceRgb(CRGB background[WIDTH][HEIGHT], int mode)
 {
-    const CRGB rgb[] = {CRGB::Red, CRGB::Yellow, CRGB::Green, CRGB::Cyan, CRGB::Blue, CRGB::Magenta};
+    const CRGB rgb[] = { CRGB::Red, CRGB::Yellow, CRGB::Green, CRGB::Cyan, CRGB::Blue, CRGB::Magenta };
     static short int hue = 0;
     for (int x = 0; x < WIDTH; x++)
     {
@@ -79,7 +79,7 @@ void fire(CRGB background[WIDTH][HEIGHT])
 void epilepsie(CRGB background[WIDTH][HEIGHT])
 {
     static int hue = 0;
-    const CRGB rgb[] = {CRGB::Red, CRGB::Yellow, CRGB::Green, CRGB::Cyan, CRGB::Blue, CRGB::Magenta};
+    const CRGB rgb[] = { CRGB::Red, CRGB::Yellow, CRGB::Green, CRGB::Cyan, CRGB::Blue, CRGB::Magenta };
     static int randEpi[WIDTH][HEIGHT];
     for (int x = 0; x < WIDTH; x++)
     {

@@ -1,10 +1,10 @@
 #include <Arduino.h>
-#include <FastLED.h>
 #include <stdlib.h>
 #include <time.h>
 #include "overlay.h"
 #include "background.h"
 #include <Preferences.h>
+#include "Display.h"
 
 Preferences preferences;
 
@@ -35,6 +35,8 @@ void buildMatrice();
 CRGB matrice[WIDTH][HEIGHT];
 CRGB background[WIDTH][HEIGHT];
 CRGB overlay[WIDTH][HEIGHT];
+
+Display display(WIDTH, HEIGHT, FORMAT);
 
 void setup()
 {
@@ -154,7 +156,7 @@ void buildMatrice()
   {
     for (int y = 0; y < HEIGHT; y++)
     {
-      if (overlay[x][y] == (CRGB)CRGB::Black)
+      if (overlay[x][y] == CRGB::Black)
       {
         matrice[x][y] = background[x][y];
       }
