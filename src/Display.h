@@ -3,21 +3,15 @@
 
 #include <FastLED.h>
 
-#include "DisplayCTL.h"
-#include "DisplayGFX.h"
+#include "DisplayAssembly.h"
 
-class Display
-{
-private:
-    int width;
-    int height;
-    int format;
+class Display {
+ private:
+  DisplayAssembly* controllers;
 
-    DisplayCTL controller;
-    /* data */
-public:
-    Display(int width, int height, int format);
-    ~Display();
+ public:
+  Display();
+  ~Display();
 };
 
-#endif // DISPLAY_H
+#endif  // DISPLAY_H

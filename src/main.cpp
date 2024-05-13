@@ -1,10 +1,10 @@
 #include <Arduino.h>
+#include <Preferences.h>
 #include <stdlib.h>
 #include <time.h>
-#include "overlay.h"
+
 #include "background.h"
-#include <Preferences.h>
-#include "Display.h"
+#include "overlay.h"
 
 Preferences preferences;
 
@@ -36,10 +36,7 @@ CRGB matrice[WIDTH][HEIGHT];
 CRGB background[WIDTH][HEIGHT];
 CRGB overlay[WIDTH][HEIGHT];
 
-Display display(WIDTH, HEIGHT, FORMAT);
-
-void setup()
-{
+void setup() {
   Serial.begin(115200);
   preferences.begin("display");
 #if FORMAT == 0
@@ -59,80 +56,62 @@ void setup()
   NaNoverlay(overlay, 3, 4);
 }
 
-void loop()
-{
+void loop() {
   static short bg = preferences.getShort("bg", 2);
   static short brightness = preferences.getShort("brightness", 1);
   static long counter = 0;
   static bool button_bg = false;
   static bool button_brightness = false;
-  if (!digitalRead(BG_BUTTON_PIN))
-  {
-    if (!button_bg)
-    {
+  if (!digitalRead(BG_BUTTON_PIN)) {
+    if (!button_bg) {
       button_bg = true;
       bg++;
-      if (bg > 4)
-        bg = 1;
+      if (bg > 4) bg = 1;
     }
-  }
-  else
-  {
-    if (button_bg)
-    {
+  } else {
+    if (button_bg) {
       preferences.putShort("bg", bg);
       button_bg = false;
     }
   }
 
-  if (!digitalRead(MODE_BUTTON_PIN))
-  {
-    if (!button_brightness)
-    {
+  if (!digitalRead(MODE_BUTTON_PIN)) {
+    if (!button_brightness) {
       button_brightness = true;
       brightness++;
-      if (brightness > 1)
-        brightness = 0;
+      if (brightness > 1) brightness = 0;
     }
-  }
-  else
-  {
-    if (button_brightness)
-    {
+  } else {
+    if (button_brightness) {
       preferences.putShort("brightness", brightness);
       button_brightness = false;
     }
   }
   brightness ? FastLED.setBrightness(1) : FastLED.setBrightness(16);
 
-  if (!(counter % 5))
-  {
-    switch (bg)
-    {
-    case 1:
-      matriceRgb(background, brightness);
-      break;
-    case 2:
-      matrix(background);
-      break;
-    case 3:
-      fire(background);
-      break;
-    case 4:
-      epilepsie(background);
-      break;
-    default:
-      break;
+  if (!(counter % 5)) {
+    switch (bg) {
+      case 1:
+        matriceRgb(background, brightness);
+        break;
+      case 2:
+        matrix(background);
+        break;
+      case 3:
+        fire(background);
+        break;
+      case 4:
+        epilepsie(background);
+        break;
+      default:
+        break;
     }
   }
 
 #if FORMAT == 1
-  if (!(counter % 10))
-  {
-    for (int x = 0; x < WIDTH; x++)
-    {
-      for (int y = 0; y < HEIGHT; y++)
-      {
+  if (!(counter % 10)) {
+    for (int x = 0; x < WIDTH; x++) {
+      for (int y = 0; y < HEIGHT; y++) {
         overlay[x][y] = CRGB::Black;
       }
     }
@@ -140,8 +119,7 @@ void loop()
   }
 #endif
 
-  if (!(counter % 5))
-  {
+  if (!(counter % 5)) {
     buildMatrice();
     matriceToLed();
     FastLED.show();
@@ -150,63 +128,42 @@ void loop()
   counter++;
 }
 
-void buildMatrice()
-{
-  for (int x = 0; x < WIDTH; x++)
-  {
-    for (int y = 0; y < HEIGHT; y++)
-    {
-      if (overlay[x][y] == CRGB::Black)
-      {
+void buildMatrice() {
+  for (int x = 0; x < WIDTH; x++) {
+    for (int y = 0; y < HEIGHT; y++) {
+      if (overlay[x][y] == CRGB::Black) {
         matrice[x][y] = background[x][y];
-      }
-      else
-      {
+      } else {
         matrice[x][y] = overlay[x][y];
       }
     }
   }
 }
 
-void matriceToLed()
-{
+void matriceToLed() {
   CRGB color;
-  for (int x = 0; x < WIDTH; x++)
-  {
-    for (int y = 0; y < HEIGHT; y++)
-    {
+  for (int x = 0; x < WIDTH; x++) {
+    for (int y = 0; y < HEIGHT; y++) {
       color = matrice[x][y];
 #if FORMAT == 0
-      if (y >= 8)
-      {
-        if (x % 2)
-        {
+      if (y >= 8) {
+        if (x % 2) {
           bot[x * 8 - y + 15] = color;
-        }
-        else
-        {
+        } else {
           bot[x * 8 + y - 8] = color;
         }
-      }
-      else
-      {
-        if (x % 2)
-        {
+      } else {
+        if (x % 2) {
           top[x * 8 - y + 7] = color;
-        }
-        else
-        {
+        } else {
           top[x * 8 + y] = color;
         }
       }
 #endif
 #if FORMAT == 1
-      if (x % 2)
-      {
+      if (x % 2) {
         leds[x * 8 - y + 7] = matrice[x][y];
-      }
-      else
-      {
+      } else {
         leds[x * 8 + y] = matrice[x][y];
       }
 #endif

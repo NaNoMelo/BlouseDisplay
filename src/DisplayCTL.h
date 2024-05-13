@@ -4,20 +4,27 @@
 #include <Arduino.h>
 #include <FastLED.h>
 
-class DisplayCTL
-{
-private:
-    int width;
-    int height;
-    int format;
+enum DCTLFormat { VERTICAL, HORIZONTAL };
+class DisplayCTL {
+ private:
+  int width;
+  int height;
+  uint8_t pin;
+  DCTLFormat format = VERTICAL;
+  CRGB *leds;
 
-    CRGB top[256];
-    CRGB bottom[256];
-    CRGB leds[128];
-    /* data */
-public:
-    DisplayCTL(int width, int height, int format);
-    ~DisplayCTL();
+ protected:
+  friend class DisplayAssembly;
+  int getIndex(int x, int y);
+  int offset = 0;
+  void setupLeds();
+
+ public:
+  int getWidth() { return width; }
+  int getHeight() { return height; }
+  DisplayCTL(int width, int height, uint8_t pin, int format = VERTICAL);
+  void updateLeds(CRGB **matrice);
+  ~DisplayCTL() { delete[] leds; }
 };
 
-#endif // DISPLAYCTL_H
+#endif  // DISPLAYCTL_H
