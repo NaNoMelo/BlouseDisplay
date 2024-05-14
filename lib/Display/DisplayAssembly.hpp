@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include <FastLED.h>
 
-#include "DisplayCTL.h"
+#include "DisplayCTL.hpp"
 
 enum DARotation { R_0 = 0, R_90 = 1, R_180 = 2, R_270 = 3 };
 struct DCTLList {
@@ -35,9 +35,9 @@ class DisplayAssembly {
  private:
   DCTLList *controllers = NULL;
   int nbControllers = 0;
-  CRGB ***matrice = NULL;
   int aWidth = 0;
   int aHeight = 0;
+  CRGB ***matrice = NULL;
 
  public:
   void addController(DisplayCTL *controller, int xPos = 0, int yPos = 0,
@@ -46,6 +46,9 @@ class DisplayAssembly {
                      DCTLFormat format = VERTICAL, int xPos = 0, int yPos = 0,
                      DARotation rotation = R_0);
   void updateMatrice();
+  int getWidth(){ return aWidth; }
+  int getHeight(){ return aHeight; }
+  CRGB ***getMatrice(){ return matrice; }
   ~DisplayAssembly();
 };
 

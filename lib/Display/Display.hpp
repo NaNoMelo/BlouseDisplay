@@ -3,7 +3,7 @@
 
 #include <FastLED.h>
 
-#include "DisplayAssembly.h"
+#include "DisplayAssembly.hpp"
 
 class Display {
  private:

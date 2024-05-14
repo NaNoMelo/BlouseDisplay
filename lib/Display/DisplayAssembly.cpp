@@ -1,6 +1,4 @@
-#include "DisplayAssembly.h"
-
-#include "Display.h"
+#include "DisplayAssembly.hpp"
 
 /**
  * @brief Get the updated x coord of a controller after a clockwise rotation
@@ -33,8 +31,8 @@
  * y = -x
  */
 
-void DisplayAssembly::addController(DisplayCTL *controller, int xPos = 0,
-                                    int yPos = 0, DARotation rotation = R_0) {
+void DisplayAssembly::addController(DisplayCTL *controller, int xPos,
+                                    int yPos, DARotation rotation) {
   DCTLList *new_ctl = new DCTLList(controller, xPos, yPos, rotation);
   new_ctl->next = controllers;
   controllers = new_ctl;
@@ -42,8 +40,8 @@ void DisplayAssembly::addController(DisplayCTL *controller, int xPos = 0,
 }
 
 void DisplayAssembly::addController(int width, int height, uint8_t pin,
-                                    DCTLFormat format = VERTICAL, int xPos = 0,
-                                    int yPos = 0, DARotation rotation = R_0) {
+                                    DCTLFormat format, int xPos,
+                                    int yPos, DARotation rotation) {
   DisplayCTL *new_ctl = new DisplayCTL(width, height, pin, format);
   addController(new_ctl, xPos, yPos, rotation);
 }
@@ -92,7 +90,7 @@ void DisplayAssembly::updateMatrice() {
     controller->offset +=
         controller->width * controller->height * usedPins[controller->pin];
     usedPins[controller->pin]++;
-    controller->setupLeds();
+    // controller->setupLeds();
     current = current->next;
   }
 
@@ -107,8 +105,9 @@ void DisplayAssembly::updateMatrice() {
 
 DisplayAssembly::~DisplayAssembly() {
   DCTLList *current = controllers;
+  DCTLList *next;
   while (current != NULL) {
-    DCTLList *next = current->next;
+    next = current->next;
     delete current;
     current = next;
   }

@@ -12,17 +12,20 @@ class DisplayCTL {
   uint8_t pin;
   DCTLFormat format = VERTICAL;
   CRGB *leds;
+  int offset = 0;
 
  protected:
   friend class DisplayAssembly;
   int getIndex(int x, int y);
-  int offset = 0;
-  void setupLeds();
+  void setOffset(int offset) { this->offset = offset; }
+  //void setupLeds();
 
  public:
   int getWidth() { return width; }
   int getHeight() { return height; }
-  DisplayCTL(int width, int height, uint8_t pin, int format = VERTICAL);
+  int getOffset() { return offset; }
+  CRGB *getLeds() { return leds; }
+  DisplayCTL(int width, int height, uint8_t pin, DCTLFormat format = VERTICAL);
   void updateLeds(CRGB **matrice);
   ~DisplayCTL() { delete[] leds; }
 };

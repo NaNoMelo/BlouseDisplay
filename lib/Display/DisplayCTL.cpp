@@ -1,9 +1,9 @@
-#include "DisplayCTL.h"
+#include "DisplayCTL.hpp"
 
 #include <FastLED.h>
 
 DisplayCTL::DisplayCTL(int width, int height, uint8_t pin,
-                       int format = VERTICAL) {
+                       DCTLFormat format) {
   width = width;
   height = height;
   format = format;
@@ -31,7 +31,7 @@ int DisplayCTL::getIndex(int x, int y) {
  * @note This function exists because of the unability to use the
  * FastLED.addLeds function with a variable pin number
  */
-void DisplayCTL::setupLeds() {
+/*void DisplayCTL::setupLeds() {
   switch (pin) {
     case 1:
       FastLED.addLeds<NEOPIXEL, 1>(leds, width * height, offset);
@@ -106,4 +106,4 @@ void DisplayCTL::setupLeds() {
       FastLED.addLeds<NEOPIXEL, 24>(leds, width * height, offset);
       break;
   }
-}
+}*/
