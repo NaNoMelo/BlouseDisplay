@@ -3,14 +3,14 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "background.h"
-#include "overlay.h"
 #include "DisplayAssembly.hpp"
 #include "DisplayCTL.hpp"
+#include "background.h"
+#include "overlay.h"
 
 Preferences preferences;
 DisplayAssembly display;
-CRGB*** matrice = display.getMatrice();
+CRGB ***matrice = display.getMatrice();
 
 #define BG_BUTTON_PIN 19
 #define MODE_BUTTON_PIN 18
@@ -26,8 +26,10 @@ void setup() {
   display.addController(top, 0, 0);
   display.addController(bottom, 0, 8);
   display.updateMatrice();
-  FastLED.addLeds<NEOPIXEL, 27>(top->getLeds(), top->getWidth() * top->getHeight(),top->getOffset());
-  FastLED.addLeds<NEOPIXEL, 25>(bottom->getLeds(), bottom->getWidth() * bottom->getHeight(),bottom->getOffset());
+  FastLED.addLeds<NEOPIXEL, 27>(top->getLeds(),
+                                top->getWidth() * top->getHeight());
+  FastLED.addLeds<NEOPIXEL, 25>(bottom->getLeds(),
+                                bottom->getWidth() * bottom->getHeight());
 
   FastLED.setMaxPowerInVoltsAndMilliamps(5, 1000);
   FastLED.setMaxRefreshRate(30);
@@ -38,6 +40,7 @@ void setup() {
 }
 
 void loop() {
+  Serial.println("loop");
   static short bg = preferences.getShort("bg", 2);
   static short brightness = preferences.getShort("brightness", 1);
   static long counter = 0;

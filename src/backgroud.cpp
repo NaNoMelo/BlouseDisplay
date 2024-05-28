@@ -27,11 +27,11 @@ void matrix(DisplayAssembly display) {
     }
   }
   for (int x = 0; x < display.getWidth(); x++) {
-    *display.getMatrice()[x][0] = CRGB::Black;
+    display.getMatrice()[x][0]->setRGB(0, 0, 0);
   }
   for (int i = 0; i < 3; i++) {
     alea = rand() % display.getWidth();
-    *display.getMatrice()[alea][0] = CRGB::Green;
+    display.getMatrice()[alea][0]->setRGB(0, 255, 0);
   }
 }
 

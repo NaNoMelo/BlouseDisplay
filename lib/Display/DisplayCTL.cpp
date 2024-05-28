@@ -2,28 +2,17 @@
 
 #include <FastLED.h>
 
-DisplayCTL::DisplayCTL(int width, int height, uint8_t pin,
-                       DCTLFormat format) {
-  width = width;
-  height = height;
-  format = format;
-  pin = pin;
+DisplayCTL::DisplayCTL(int width, int height, uint8_t pin, DCTLFormat format) {
+  this->width = width;
+  this->height = height;
+  this->format = format;
+  this->pin = pin;
 
-  leds = new CRGB[width * height];
-}
-
-void DisplayCTL::updateLeds(CRGB **matrice) {
-  int index;
-  for (int i = 0; i < width; i++) {
-    for (int j = 0; j < height; j++) {
-      index = getIndex(i, j);
-      leds[index] = matrice[i][j];
-    }
-  }
+  leds = new CRGB[width * height]{0, 0, 0};
 }
 
 int DisplayCTL::getIndex(int x, int y) {
-  return (x + x % 2) * height + (1 - 2 * x % 2) * y - x % 2;
+  return (x + x % 2) * height + (1 - 2 * (x % 2)) * y - x % 2;
 }
 
 /**

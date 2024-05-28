@@ -18,7 +18,7 @@ class DisplayCTL {
   friend class DisplayAssembly;
   int getIndex(int x, int y);
   void setOffset(int offset) { this->offset = offset; }
-  //void setupLeds();
+  // void setupLeds();
 
  public:
   int getWidth() { return width; }
@@ -26,7 +26,6 @@ class DisplayCTL {
   int getOffset() { return offset; }
   CRGB *getLeds() { return leds; }
   DisplayCTL(int width, int height, uint8_t pin, DCTLFormat format = VERTICAL);
-  void updateLeds(CRGB **matrice);
   ~DisplayCTL() { delete[] leds; }
 };
 
