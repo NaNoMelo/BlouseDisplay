@@ -63,6 +63,7 @@ struct DCTLList {
 // DisplayAssembly
 class DisplayAssembly {
  public:
+  DisplayAssembly() = default;
   ~DisplayAssembly();
 
   DisplayAssembly(const DisplayAssembly &) = delete;

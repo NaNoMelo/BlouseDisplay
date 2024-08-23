@@ -41,6 +41,7 @@ CRGB DisplayAssembly::getPixel(int x, int y) {
       int cY = R_Y(inverseRotation, x - current->min_x, y - current->min_y);
       return current->controller->getPixel(cX, cY);
     }
+    current = current->next;
   }
   return CRGB::Black;
 }
@@ -56,6 +57,7 @@ void DisplayAssembly::setPixel(int x, int y, CRGB color) {
       int cY = R_Y(inverseRotation, x - current->min_x, y - current->min_y);
       current->controller->setPixel(cX, cY, color);
     }
+    current = current->next;
   }
 }
 
