@@ -9,6 +9,7 @@ DisplayCTL::DisplayCTL(int width, int height, uint8_t pin, DCTLFormat format) {
   this->pin = pin;
 
   leds = new CRGB[width * height]{0, 0, 0};
+  setupLeds();
 }
 
 int DisplayCTL::getIndex(int x, int y) {
@@ -20,79 +21,21 @@ int DisplayCTL::getIndex(int x, int y) {
  * @note This function exists because of the unability to use the
  * FastLED.addLeds function with a variable pin number
  */
-/*void DisplayCTL::setupLeds() {
+void DisplayCTL::setupLeds() {
   switch (pin) {
-    case 1:
-      FastLED.addLeds<NEOPIXEL, 1>(leds, width * height, offset);
+    case 25:
+      FastLED.addLeds<NEOPIXEL, 25>(leds, width * height);
       break;
-    case 2:
-      FastLED.addLeds<NEOPIXEL, 2>(leds, width * height, offset);
+    case 27:
+      FastLED.addLeds<NEOPIXEL, 27>(leds, width * height);
       break;
-    case 3:
-      FastLED.addLeds<NEOPIXEL, 3>(leds, width * height, offset);
-      break;
-    case 4:
-      FastLED.addLeds<NEOPIXEL, 4>(leds, width * height, offset);
-      break;
-    case 5:
-      FastLED.addLeds<NEOPIXEL, 5>(leds, width * height, offset);
-      break;
-    case 6:
-      FastLED.addLeds<NEOPIXEL, 6>(leds, width * height, offset);
-      break;
-    case 7:
-      FastLED.addLeds<NEOPIXEL, 7>(leds, width * height, offset);
-      break;
-    case 8:
-      FastLED.addLeds<NEOPIXEL, 8>(leds, width * height, offset);
-      break;
-    case 9:
-      FastLED.addLeds<NEOPIXEL, 9>(leds, width * height, offset);
-      break;
-    case 10:
-      FastLED.addLeds<NEOPIXEL, 10>(leds, width * height, offset);
-      break;
-    case 11:
-      FastLED.addLeds<NEOPIXEL, 11>(leds, width * height, offset);
-      break;
-    case 12:
-      FastLED.addLeds<NEOPIXEL, 12>(leds, width * height, offset);
-      break;
-    case 13:
-      FastLED.addLeds<NEOPIXEL, 13>(leds, width * height, offset);
-      break;
-    case 14:
-      FastLED.addLeds<NEOPIXEL, 14>(leds, width * height, offset);
-      break;
-    case 15:
-      FastLED.addLeds<NEOPIXEL, 15>(leds, width * height, offset);
-      break;
-    case 16:
-      FastLED.addLeds<NEOPIXEL, 16>(leds, width * height, offset);
-      break;
-    case 17:
-      FastLED.addLeds<NEOPIXEL, 17>(leds, width * height, offset);
-      break;
-    case 18:
-      FastLED.addLeds<NEOPIXEL, 18>(leds, width * height, offset);
-      break;
-    case 19:
-      FastLED.addLeds<NEOPIXEL, 19>(leds, width * height, offset);
-      break;
-    case 20:
-      FastLED.addLeds<NEOPIXEL, 20>(leds, width * height, offset);
-      break;
-    case 21:
-      FastLED.addLeds<NEOPIXEL, 21>(leds, width * height, offset);
-      break;
-    case 22:
-      FastLED.addLeds<NEOPIXEL, 22>(leds, width * height, offset);
-      break;
-    case 23:
-      FastLED.addLeds<NEOPIXEL, 23>(leds, width * height, offset);
-      break;
-    case 24:
-      FastLED.addLeds<NEOPIXEL, 24>(leds, width * height, offset);
+    default:
       break;
   }
-}*/
+}
+
+void DisplayCTL::setPixel(int x, int y, CRGB color) {
+  if (x < 0 || x >= width || y < 0 || y >= height)
+    return;  // throw "DisplayCTL : Out of bounds setPixel";
+  leds[getIndex(x, y)] = color;
+}

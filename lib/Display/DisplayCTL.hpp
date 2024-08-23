@@ -12,21 +12,23 @@ class DisplayCTL {
   uint8_t pin;
   DCTLFormat format = VERTICAL;
   CRGB *leds;
-  int offset = 0;
 
  protected:
-  friend class DisplayAssembly;
   int getIndex(int x, int y);
-  void setOffset(int offset) { this->offset = offset; }
-  // void setupLeds();
+  CRGB *getLeds() { return leds; }
+  void setupLeds();
 
  public:
-  int getWidth() { return width; }
-  int getHeight() { return height; }
-  int getOffset() { return offset; }
-  CRGB *getLeds() { return leds; }
   DisplayCTL(int width, int height, uint8_t pin, DCTLFormat format = VERTICAL);
   ~DisplayCTL() { delete[] leds; }
+
+  DisplayCTL(const DisplayCTL &) = delete;
+  DisplayCTL &operator=(const DisplayCTL &) = delete;
+
+  int getWidth() { return width; }
+  int getHeight() { return height; }
+
+  void setPixel(int x, int y, CRGB color);
 };
 
 #endif  // DISPLAYCTL_H
