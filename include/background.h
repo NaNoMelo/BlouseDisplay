@@ -5,19 +5,11 @@
 #include <FastLED.h>
 #include <stdlib.h>
 
-#define FORMAT 0
-#if FORMAT == 0
-#define WIDTH 32
-#define HEIGHT 16
-#endif
-#if FORMAT == 1
-#define WIDTH 16
-#define HEIGHT 8
-#endif
+#include "DisplayAssembly.hpp"
 
-void matriceRgb(CRGB background[WIDTH][HEIGHT], int mode);
-void matrix(CRGB background[WIDTH][HEIGHT]);
-void fire(CRGB background[WIDTH][HEIGHT]);
-void epilepsie(CRGB background[WIDTH][HEIGHT]);
+void matriceRgb(DisplayAssembly *display, int mode);
+void matrix(DisplayAssembly *display);
+void fire(DisplayAssembly *display);
+void epilepsie(DisplayAssembly *display);
 
-#endif // BLOUSEDISPLAY_BACKGROUND_H
+#endif  // BLOUSEDISPLAY_BACKGROUND_H
