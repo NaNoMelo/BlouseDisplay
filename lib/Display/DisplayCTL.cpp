@@ -1,7 +1,5 @@
 #include "DisplayCTL.hpp"
 
-#include <FastLED.h>
-
 DisplayCTL::DisplayCTL(int width, int height, uint8_t pin, DCTLFormat format) {
   this->width = width;
   this->height = height;
@@ -14,6 +12,12 @@ DisplayCTL::DisplayCTL(int width, int height, uint8_t pin, DCTLFormat format) {
 
 int DisplayCTL::getIndex(int x, int y) {
   return (x + x % 2) * height + (1 - 2 * (x % 2)) * y - x % 2;
+}
+
+void DisplayCTL::setPixel(int x, int y, CRGB color) {
+  if (x < 0 || x >= width || y < 0 || y >= height)
+    return;  // throw "DisplayCTL : Out of bounds setPixel";
+  leds[getIndex(x, y)] = color;
 }
 
 /**
@@ -32,10 +36,4 @@ void DisplayCTL::setupLeds() {
     default:
       break;
   }
-}
-
-void DisplayCTL::setPixel(int x, int y, CRGB color) {
-  if (x < 0 || x >= width || y < 0 || y >= height)
-    return;  // throw "DisplayCTL : Out of bounds setPixel";
-  leds[getIndex(x, y)] = color;
 }
