@@ -2,7 +2,6 @@
 
 Debouncer::Debouncer(short pin, unsigned int debounceDelay) {
   _pin = pin;
-  pinMode(pin, INPUT_PULLUP);
 
   _debounceDelay = debounceDelay;
   _lastDebounceTime = millis();

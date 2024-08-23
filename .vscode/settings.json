@@ -1,7 +1,8 @@
 {
   "files.associations": {
     "random": "cpp",
-    "new": "cpp"
+    "new": "cpp",
+    "cmath": "cpp"
   },
   "C_Cpp.errorSquiggles": "enabled"
 }

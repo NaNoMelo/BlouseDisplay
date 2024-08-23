@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "Debouncer.hpp"
 #include "DisplayAssembly.hpp"
 #include "DisplayCTL.hpp"
 #include "background.h"
@@ -10,91 +11,85 @@
 
 Preferences preferences;
 DisplayAssembly display;
-CRGB ***matrice = display.getMatrice();
+
+#define FPS 30
 
 #define BG_BUTTON_PIN 19
-#define MODE_BUTTON_PIN 18
-
-void matriceToLed();
-void buildMatrice();
+#define BRIGHTNESS_BUTTON_PIN 18
 
 void setup() {
   Serial.begin(115200);
   preferences.begin("display");
-  DisplayCTL *top = new DisplayCTL(32, 8, 27, VERTICAL);
-  DisplayCTL *bottom = new DisplayCTL(32, 8, 25, VERTICAL);
-  display.addController(top, 0, 0);
-  display.addController(bottom, 0, 8);
-  display.updateMatrice();
-  FastLED.addLeds<NEOPIXEL, 27>(top->getLeds(),
-                                top->getWidth() * top->getHeight());
-  FastLED.addLeds<NEOPIXEL, 25>(bottom->getLeds(),
-                                bottom->getWidth() * bottom->getHeight());
+  display.addController(32, 8, 27, VERTICAL, 0, 0);
+  display.addController(32, 8, 25, VERTICAL, 0, 8);
 
   FastLED.setMaxPowerInVoltsAndMilliamps(5, 1000);
-  FastLED.setMaxRefreshRate(30);
+  FastLED.setMaxRefreshRate(600);
   FastLED.setBrightness(1);
   srand(time(NULL));
   pinMode(BG_BUTTON_PIN, INPUT_PULLUP);
-  pinMode(MODE_BUTTON_PIN, INPUT_PULLUP);
+  pinMode(BRIGHTNESS_BUTTON_PIN, INPUT_PULLUP);
+  FastLED.show();
 }
 
+Debouncer bg_button(BG_BUTTON_PIN);
+Debouncer brightness_button(BRIGHTNESS_BUTTON_PIN);
 void loop() {
-  Serial.println("loop");
-  static short bg = preferences.getShort("bg", 2);
+  /* TEST SEGMENT --------------------
+  static unsigned short hue = 0;
+  long time = millis();
+  for (int i = 0; i < display.getWidth(); i++) {
+    for (int j = 0; j < display.getHeight(); j++) {
+      display.setPixel(i, j, CHSV((hue + i + j) % 256, 255, 255));
+    }
+  }
+  hue++;
+  FastLED.show();
+  Serial.print("time:");
+  Serial.println(millis() - time);
+  // TEST SEGMENT*/
+
+  static short bg = preferences.getShort("bg", 1);
+  bg_button.read();
+  if (bg_button.isFallingEdge()) {
+    bg = (bg + 1) % 4;
+  }
+  if (bg_button.isRisingEdge()) {
+    preferences.putShort("bg", bg);
+  }
+
   static short brightness = preferences.getShort("brightness", 1);
-  static long counter = 0;
-  static bool button_bg = false;
-  static bool button_brightness = false;
-  if (!digitalRead(BG_BUTTON_PIN)) {
-    if (!button_bg) {
-      button_bg = true;
-      bg++;
-      if (bg > 4) bg = 1;
-    }
-  } else {
-    if (button_bg) {
-      preferences.putShort("bg", bg);
-      button_bg = false;
-    }
+  brightness_button.read();
+  if (brightness_button.isFallingEdge()) {
+    brightness = !brightness;
+    brightness ? FastLED.setBrightness(1) : FastLED.setBrightness(16);
+  }
+  if (brightness_button.isRisingEdge()) {
+    preferences.putShort("brightness", brightness);
   }
 
-  if (!digitalRead(MODE_BUTTON_PIN)) {
-    if (!button_brightness) {
-      button_brightness = true;
-      brightness++;
-      if (brightness > 1) brightness = 0;
-    }
-  } else {
-    if (button_brightness) {
-      preferences.putShort("brightness", brightness);
-      button_brightness = false;
-    }
-  }
-  brightness ? FastLED.setBrightness(1) : FastLED.setBrightness(16);
+  static long lastFrame = 0;
+  if (true) {  // millis() - lastFrame > 50) {
+    Serial.println(millis() - lastFrame);
+    lastFrame = millis();
 
-  if (!(counter % 5)) {
     switch (bg) {
+      case 0:
+        matriceRgb(&display, brightness);
+        break;
       case 1:
-        matriceRgb(display, brightness);
+        matrix(&display);
         break;
       case 2:
-        matrix(display);
+        fire(&display);
         break;
       case 3:
-        fire(display);
-        break;
-      case 4:
-        epilepsie(display);
+        epilepsie(&display);
         break;
       default:
         break;
     }
-  }
-
-  if (!(counter % 5)) {
     FastLED.show();
   }
-  delay(10);
-  counter++;
+  // delay(10);
 }

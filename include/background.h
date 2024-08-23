@@ -7,9 +7,9 @@
 
 #include "DisplayAssembly.hpp"
 
-void matriceRgb(DisplayAssembly display, int mode);
-void matrix(DisplayAssembly display);
-void fire(DisplayAssembly display);
-void epilepsie(DisplayAssembly display);
+void matriceRgb(DisplayAssembly *display, int mode);
+void matrix(DisplayAssembly *display);
+void fire(DisplayAssembly *display);
+void epilepsie(DisplayAssembly *display);
 
-#endif // BLOUSEDISPLAY_BACKGROUND_H
+#endif  // BLOUSEDISPLAY_BACKGROUND_H
