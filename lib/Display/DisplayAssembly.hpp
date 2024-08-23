@@ -38,59 +38,58 @@
  */
 
 enum DARotation { R_0 = 0, R_90 = 1, R_180 = 2, R_270 = 3 };
+
+// DCTLList
 struct DCTLList {
-  DisplayCTL *controller;
+  DARotation rotation = R_0;
   int x;
   int y;
-  DARotation rotation = R_0;
+
+  int min_x;
+  int min_y;
+  int max_x;
+  int max_y;
+
+  bool external = true;
+  DisplayCTL *controller;
   DCTLList *next = NULL;
 
-  DCTLList(int width, int height, uint8_t pin, DCTLFormat format = VERTICAL,
-           int xPos = 0, int yPos = 0, DARotation rotation = R_0) {
-    controller = new DisplayCTL(width, height, pin, format);
-    x = xPos;
-    y = yPos;
-    this->rotation = rotation;
-  }
-
   DCTLList(DisplayCTL *controller, int xPos = 0, int yPos = 0,
-           DARotation rotation = R_0) {
-    this->controller = controller;
-    x = xPos;
-    y = yPos;
-    this->rotation = rotation;
-  }
-};
-struct CRGBList {
-  CRGB *pixel;
-  CRGBList *next = NULL;
+           DARotation rotation = R_0, bool external = true);
 
-  CRGBList(CRGB *pixel, CRGBList *next = NULL) {
-    this->pixel = pixel;
-    this->next = next;
-  }
+  ~DCTLList();
 };
 
+// DisplayAssembly
 class DisplayAssembly {
  private:
-  DCTLList *controllers = NULL;
+  int width = 0;
+  int height = 0;
+
+  int min_x = 0;
+  int min_y = 0;
+  int max_x = 0;
+  int max_y = 0;
+
   int nbControllers = 0;
-  int aWidth = 0;
-  int aHeight = 0;
-  CRGB ***matrice = NULL;
-  CRGBList *voidPixels = NULL;
+  DCTLList *controllers = NULL;
 
  public:
+  ~DisplayAssembly();
+
+  DisplayAssembly(const DisplayAssembly &) = delete;
+  DisplayAssembly &operator=(const DisplayAssembly &) = delete;
+
+  int getWidth() { return width; }
+  int getHeight() { return height; }
+
+  void setPixel(int x, int y, CRGB color);
+
   void addController(DisplayCTL *controller, int xPos = 0, int yPos = 0,
-                     DARotation rotation = R_0);
+                     DARotation rotation = R_0, bool external = true);
   void addController(int width, int height, uint8_t pin,
                      DCTLFormat format = VERTICAL, int xPos = 0, int yPos = 0,
                      DARotation rotation = R_0);
-  void updateMatrice();
-  int getWidth() { return aWidth; }
-  int getHeight() { return aHeight; }
-  CRGB ***getMatrice() { return matrice; }
-  ~DisplayAssembly();
 };
 
 #endif  // DISPLAYASSEMBLY_H

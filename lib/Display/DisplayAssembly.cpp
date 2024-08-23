@@ -1,93 +1,73 @@
 #include "DisplayAssembly.hpp"
 
+// DCTLList
+
+DCTLList::DCTLList(DisplayCTL *controller, int xPos, int yPos,
+                   DARotation rotation, bool external) {
+  this->controller = controller;
+  x = xPos;
+  y = yPos;
+  this->rotation = rotation;
+
+  int width = controller->getWidth();
+  int height = controller->getHeight();
+  min_x = min(x, x + R_X(rotation, width, height));
+  min_y = min(y, y + R_Y(rotation, width, height));
+  max_x = max(x, x + R_X(rotation, width, height));
+  max_y = max(y, y + R_Y(rotation, width, height));
+
+  this->external = external;
+}
+
+DCTLList::~DCTLList() {
+  if (!external) delete controller;
+  if (next != NULL) {
+    delete next;
+  }
+}
+
+// DisplayAssembly
+
+DisplayAssembly::~DisplayAssembly() {
+  if (controllers != NULL) {
+    delete controllers;
+  }
+}
+
+void DisplayAssembly::setPixel(int x, int y, CRGB color) {
+  if (x < min_x || x > max_x || y < min_y || y > max_y) return;
+  DCTLList *current = controllers;
+  while (current != NULL) {
+    if (x >= current->min_x && x <= current->max_x && y >= current->min_y &&
+        y <= current->max_y) {
+      int inverseRotation = (4 - current->rotation) % 4;
+      int cX = R_X(inverseRotation, x - current->min_x, y - current->min_y);
+      int cY = R_Y(inverseRotation, x - current->min_x, y - current->min_y);
+      current->controller->setPixel(cX, cY, color);
+      return;
+    }
+  }
+}
+
 void DisplayAssembly::addController(DisplayCTL *controller, int xPos, int yPos,
-                                    DARotation rotation) {
-  DCTLList *new_ctl = new DCTLList{controller, xPos, yPos, rotation};
+                                    DARotation rotation, bool external) {
+  DCTLList *new_ctl = new DCTLList(controller, xPos, yPos, rotation, external);
+
+  min_x = min(min_x, new_ctl->min_x);
+  min_y = min(min_y, new_ctl->min_y);
+  max_x = max(max_x, new_ctl->max_x);
+  max_y = max(max_y, new_ctl->max_y);
+  width = max_x - min_x;
+  height = max_y - min_y;
+  nbControllers++;
+
   new_ctl->next = controllers;
   controllers = new_ctl;
-  nbControllers++;
 }
 
 void DisplayAssembly::addController(int width, int height, uint8_t pin,
                                     DCTLFormat format, int xPos, int yPos,
                                     DARotation rotation) {
-  DisplayCTL *new_ctl = new DisplayCTL{width, height, pin, format};
-  addController(new_ctl, xPos, yPos, rotation);
-}
-
-// TODO check the coordinates of the controllers within the matrice
-void DisplayAssembly::updateMatrice() {
-  DCTLList *current = controllers;
-  while (current != NULL) {
-    DARotation rotation = current->rotation;
-    int width = current->controller->getWidth();
-    int height = current->controller->getHeight();
-    aWidth = max(
-        aWidth, max(current->x + R_X(rotation, width, height), current->x + 1));
-    aHeight = max(aHeight, max(current->y + R_Y(rotation, width, height),
-                               current->y + 1));
-    current = current->next;
-  }
-  if (matrice != NULL) {
-    delete[] matrice;
-    delete matrice;
-  }
-  matrice = new CRGB **[aWidth];
-  for (int i = 0; i < aWidth; i++) {
-    matrice[i] = new CRGB *[aHeight];
-  }
-
-  current = controllers;
-  DisplayCTL *controller;
-  while (current != NULL) {
-    // Creation of the link beetwen the controller and the matrice
-    controller = current->controller;
-    DARotation rotation = current->rotation;
-    int width = controller->getWidth();
-    int height = controller->getHeight();
-    for (int i = 0; i < width; i++) {
-      for (int j = 0; j < height; j++) {
-        int x = current->x + R_X(rotation, i, j);
-        int y = current->y + R_Y(rotation, i, j);
-        if (x >= 0 && x < aWidth && y >= 0 && y < aHeight)
-          matrice[x][y] = &controller->leds[controller->getIndex(i, j)];
-      }
-    }
-
-    // TODO Set up the controller with the right offset
-    // TODO multiple controllers on the same pin
-    current = current->next;
-  }
-
-  for (int i = 0; i < aWidth; i++) {
-    for (int j = 0; j < aHeight; j++) {
-      if (matrice[i][j] == NULL) {
-        CRGB *pixel = new CRGB{0, 0, 0};
-        voidPixels = new CRGBList{pixel, voidPixels};
-        matrice[i][j] = pixel;
-      }
-    }
-  }
-}
-
-DisplayAssembly::~DisplayAssembly() {
-  DCTLList *current = controllers;
-  DCTLList *next;
-  while (current != NULL) {
-    next = current->next;
-    delete current;
-    current = next;
-  }
-  if (matrice != NULL) {
-    delete[] matrice;
-    delete matrice;
-  }
-  CRGBList *currentPixel = voidPixels;
-  CRGBList *nextPixel;
-  while (currentPixel != NULL) {
-    nextPixel = currentPixel->next;
-    delete currentPixel->pixel;
-    delete currentPixel;
-    currentPixel = nextPixel;
-  }
+  DisplayCTL *new_ctl = new DisplayCTL(width, height, pin, format);
+  addController(new_ctl, xPos, yPos, rotation, false);
 }
