@@ -9,13 +9,15 @@ void matriceRgb(DisplayAssembly *display, int mode) {
   static short int hue = 0;
   for (int x = 0; x < display->getWidth(); x++) {
     for (int y = 0; y < display->getHeight(); y++) {
-      mode ? display->setPixel(x, y, rgb[(hue + x + y) / 16 % 6])
-           : display->setPixel(
-                 x, y,
-                 CHSV(map(x + y + hue, 0,
-                          4 * (display->getWidth() + display->getHeight()), 0,
-                          255),
-                      255, 255));
+      if (mode) {
+        display->setPixel(x, y, rgb[(hue + x + y) / 16 % 6]);
+      } else {
+        display->setPixel(
+            x, y,
+            CHSV(map(x + y + hue, 0,
+                     4 * (display->getWidth() + display->getHeight()), 0, 255),
+                 255, 255));
+      }
     }
   }
   hue += 1;

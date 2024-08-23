@@ -35,7 +35,7 @@ void setup() {
 Debouncer bg_button(BG_BUTTON_PIN);
 Debouncer brightness_button(BRIGHTNESS_BUTTON_PIN);
 void loop() {
-  /* TEST SEGMENT --------------------
+  /*// TEST SEGMENT ---------------------------------
   static unsigned short hue = 0;
   long time = millis();
   for (int i = 0; i < display.getWidth(); i++) {
@@ -47,7 +47,8 @@ void loop() {
   FastLED.show();
   Serial.print("time:");
   Serial.println(millis() - time);
-  // TEST SEGMENT*/
+  delay(50);
+  */// TEST SEGMENT ---------------------------------
 
   static short bg = preferences.getShort("bg", 1);
   bg_button.read();
@@ -69,8 +70,7 @@ void loop() {
   }
 
   static long lastFrame = 0;
-  if (true) {  // millis() - lastFrame > 50) {
-    Serial.println(millis() - lastFrame);
+  if (millis() - lastFrame > 50) {
     lastFrame = millis();
 
     switch (bg) {
@@ -91,5 +91,4 @@ void loop() {
     }
     FastLED.show();
   }
-  // delay(10);
 }
