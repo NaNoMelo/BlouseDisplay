@@ -10,6 +10,12 @@ DisplayCTL::DisplayCTL(int width, int height, uint8_t pin, DCTLFormat format) {
   setupLeds();
 }
 
+CRGB DisplayCTL::getPixel(int x, int y) {
+  if (x < 0 || x >= _width || y < 0 || y >= _height)
+    return CRGB::Black;  // throw "DisplayCTL : Out of bounds getPixel";
+  return _leds[getIndex(x, y)];
+}
+
 void DisplayCTL::setPixel(int x, int y, CRGB color) {
   if (x < 0 || x >= _width || y < 0 || y >= _height)
     return;  // throw "DisplayCTL : Out of bounds setPixel";

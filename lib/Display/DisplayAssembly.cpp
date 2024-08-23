@@ -21,17 +21,28 @@ DCTLList::DCTLList(DisplayCTL *controller, int xPos, int yPos,
 
 DCTLList::~DCTLList() {
   if (!external) delete controller;
-  if (next != NULL) {
-    delete next;
-  }
+  if (next != NULL) delete next;
 }
 
 // DisplayAssembly
 
 DisplayAssembly::~DisplayAssembly() {
-  if (_controllers != NULL) {
-    delete _controllers;
+  if (_controllers != NULL) delete _controllers;
+}
+
+CRGB DisplayAssembly::getPixel(int x, int y) {
+  if (x < _min_x || x > _max_x || y < _min_y || y > _max_y) return CRGB::Black;
+  DCTLList *current = _controllers;
+  while (current != NULL) {
+    if (x >= current->min_x && x <= current->max_x && y >= current->min_y &&
+        y <= current->max_y) {
+      int inverseRotation = (4 - current->rotation) % 4;
+      int cX = R_X(inverseRotation, x - current->min_x, y - current->min_y);
+      int cY = R_Y(inverseRotation, x - current->min_x, y - current->min_y);
+      return current->controller->getPixel(cX, cY);
+    }
   }
+  return CRGB::Black;
 }
 
 void DisplayAssembly::setPixel(int x, int y, CRGB color) {
@@ -44,7 +55,6 @@ void DisplayAssembly::setPixel(int x, int y, CRGB color) {
       int cX = R_X(inverseRotation, x - current->min_x, y - current->min_y);
       int cY = R_Y(inverseRotation, x - current->min_x, y - current->min_y);
       current->controller->setPixel(cX, cY, color);
-      return;
     }
   }
 }

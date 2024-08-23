@@ -15,6 +15,7 @@ class DisplayCTL {
 
   int getWidth() { return _width; }
   int getHeight() { return _height; }
+  CRGB getPixel(int x, int y);
 
   void setPixel(int x, int y, CRGB color);
 
