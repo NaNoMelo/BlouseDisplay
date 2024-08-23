@@ -24,18 +24,27 @@ void matriceRgb(DisplayAssembly *display, int mode) {
 }
 
 void matrix(DisplayAssembly *display) {
+  static const int width = display->getWidth(), height = display->getHeight();
+  // WARNING constants manually set
+  static CRGB storage[32][16]{0, 0, 0};
   int alea;
-  for (int y = display->getHeight() - 1; y > 0; y--) {
-    for (int x = 0; x < display->getWidth(); x++) {
-      display->setPixel(x, y, display->getPixel(x, y - 1));
+  for (int y = height - 1; y > 0; y--) {
+    for (int x = 0; x < width; x++) {
+      storage[x][y] = storage[x][y - 1];
     }
   }
-  for (int x = 0; x < display->getWidth(); x++) {
-    display->setPixel(x, 0, CRGB::Black);
+  for (int x = 0; x < width; x++) {
+    storage[x][0] = CRGB::Black;
   }
   for (int i = 0; i < 3; i++) {
-    alea = rand() % display->getWidth();
-    display->setPixel(alea, 0, CRGB::Green);
+    alea = rand() % width;
+    storage[alea][0] = CRGB::Green;
+  }
+
+  for (int x = 0; x < width; x++) {
+    for (int y = 0; y < height; y++) {
+      display->setPixel(x, y, storage[x][y]);
+    }
   }
 }
 

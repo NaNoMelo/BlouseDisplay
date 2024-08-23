@@ -35,21 +35,6 @@ void setup() {
 Debouncer bg_button(BG_BUTTON_PIN);
 Debouncer brightness_button(BRIGHTNESS_BUTTON_PIN);
 void loop() {
-  /*// TEST SEGMENT ---------------------------------
-  static unsigned short hue = 0;
-  long time = millis();
-  for (int i = 0; i < display.getWidth(); i++) {
-    for (int j = 0; j < display.getHeight(); j++) {
-      display.setPixel(i, j, CHSV((hue + i + j) % 256, 255, 255));
-    }
-  }
-  hue++;
-  FastLED.show();
-  Serial.print("time:");
-  Serial.println(millis() - time);
-  delay(50);
-  */// TEST SEGMENT ---------------------------------
-
   static short bg = preferences.getShort("bg", 1);
   bg_button.read();
   if (bg_button.isFallingEdge()) {
@@ -89,6 +74,21 @@ void loop() {
       default:
         break;
     }
+    NaNoverlay(&display, 3, 4);
     FastLED.show();
   }
+  /*// TEST SEGMENT ---------------------------------
+  static unsigned short hue = 0;
+  long time = millis();
+  for (int i = 0; i < display.getWidth(); i++) {
+    for (int j = 0; j < display.getHeight(); j++) {
+      display.setPixel(i, j, CHSV((hue + i + j) % 256, 255, 255));
+    }
+  }
+  hue++;
+  FastLED.show();
+  Serial.print("time:");
+  Serial.println(millis() - time);
+  delay(50);
+  */// TEST SEGMENT ---------------------------------
 }

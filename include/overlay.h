@@ -1,21 +1,14 @@
 #ifndef BLOUSEDISPLAY_OVERLAY_H
 #define BLOUSEDISPLAY_OVERLAY_H
 
-#include <Arduino.h>
-#include <FastLED.h>
-#include <stdlib.h>
+#include "DisplayAssembly.hpp"
 
-#if FORMAT == 0
-#define WIDTH 32
-#define HEIGHT 16
-#endif
+void NaNoverlay(DisplayAssembly *display, int originX, int originY);
+void overlayBuilder(DisplayAssembly *display, bool pattern[], int width,
+                    int height, int xOffset, int yOffset);
+
 #if FORMAT == 1
-#define WIDTH 16
-#define HEIGHT 8
+void nanoScroll(DisplayAssembly *display);
 #endif
 
-void NaNoverlay(CRGB overlay[WIDTH][HEIGHT], int originX, int originY);
-void overlayBuilder(CRGB overlay[WIDTH][HEIGHT], bool pattern[], int width, int height, int xOffset, int yOffset);
-void nanoScroll(CRGB overlay[WIDTH][HEIGHT]);
-
-#endif // BLOUSEDISPLAY_OVERLAY_H
+#endif  // BLOUSEDISPLAY_OVERLAY_H
