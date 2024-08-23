@@ -29,14 +29,14 @@ DCTLList::~DCTLList() {
 // DisplayAssembly
 
 DisplayAssembly::~DisplayAssembly() {
-  if (controllers != NULL) {
-    delete controllers;
+  if (_controllers != NULL) {
+    delete _controllers;
   }
 }
 
 void DisplayAssembly::setPixel(int x, int y, CRGB color) {
-  if (x < min_x || x > max_x || y < min_y || y > max_y) return;
-  DCTLList *current = controllers;
+  if (x < _min_x || x > _max_x || y < _min_y || y > _max_y) return;
+  DCTLList *current = _controllers;
   while (current != NULL) {
     if (x >= current->min_x && x <= current->max_x && y >= current->min_y &&
         y <= current->max_y) {
@@ -53,16 +53,16 @@ void DisplayAssembly::addController(DisplayCTL *controller, int xPos, int yPos,
                                     DARotation rotation, bool external) {
   DCTLList *new_ctl = new DCTLList(controller, xPos, yPos, rotation, external);
 
-  min_x = min(min_x, new_ctl->min_x);
-  min_y = min(min_y, new_ctl->min_y);
-  max_x = max(max_x, new_ctl->max_x);
-  max_y = max(max_y, new_ctl->max_y);
-  width = max_x - min_x;
-  height = max_y - min_y;
-  nbControllers++;
+  _min_x = min(_min_x, new_ctl->min_x);
+  _min_y = min(_min_y, new_ctl->min_y);
+  _max_x = max(_max_x, new_ctl->max_x);
+  _max_y = max(_max_y, new_ctl->max_y);
+  _width = _max_x - _min_x;
+  _height = _max_y - _min_y;
+  _nbControllers++;
 
-  new_ctl->next = controllers;
-  controllers = new_ctl;
+  new_ctl->next = _controllers;
+  _controllers = new_ctl;
 }
 
 void DisplayAssembly::addController(int width, int height, uint8_t pin,

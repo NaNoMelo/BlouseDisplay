@@ -62,26 +62,14 @@ struct DCTLList {
 
 // DisplayAssembly
 class DisplayAssembly {
- private:
-  int width = 0;
-  int height = 0;
-
-  int min_x = 0;
-  int min_y = 0;
-  int max_x = 0;
-  int max_y = 0;
-
-  int nbControllers = 0;
-  DCTLList *controllers = NULL;
-
  public:
   ~DisplayAssembly();
 
   DisplayAssembly(const DisplayAssembly &) = delete;
   DisplayAssembly &operator=(const DisplayAssembly &) = delete;
 
-  int getWidth() { return width; }
-  int getHeight() { return height; }
+  int getWidth() { return _width; }
+  int getHeight() { return _height; }
 
   void setPixel(int x, int y, CRGB color);
 
@@ -90,6 +78,18 @@ class DisplayAssembly {
   void addController(int width, int height, uint8_t pin,
                      DCTLFormat format = VERTICAL, int xPos = 0, int yPos = 0,
                      DARotation rotation = R_0);
+
+ private:
+  int _width = 0;
+  int _height = 0;
+
+  int _min_x = 0;
+  int _min_y = 0;
+  int _max_x = 0;
+  int _max_y = 0;
+
+  int _nbControllers = 0;
+  DCTLList *_controllers = NULL;
 };
 
 #endif  // DISPLAYASSEMBLY_H

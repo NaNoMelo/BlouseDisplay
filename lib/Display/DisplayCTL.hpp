@@ -6,29 +6,29 @@
 
 enum DCTLFormat { VERTICAL, HORIZONTAL };
 class DisplayCTL {
- private:
-  int width;
-  int height;
-  uint8_t pin;
-  DCTLFormat format = VERTICAL;
-  CRGB *leds;
-
- protected:
-  int getIndex(int x, int y);
-  CRGB *getLeds() { return leds; }
-  void setupLeds();
-
  public:
   DisplayCTL(int width, int height, uint8_t pin, DCTLFormat format = VERTICAL);
-  ~DisplayCTL() { delete[] leds; }
+  ~DisplayCTL() { delete[] _leds; }
 
   DisplayCTL(const DisplayCTL &) = delete;
   DisplayCTL &operator=(const DisplayCTL &) = delete;
 
-  int getWidth() { return width; }
-  int getHeight() { return height; }
+  int getWidth() { return _width; }
+  int getHeight() { return _height; }
 
   void setPixel(int x, int y, CRGB color);
+
+ protected:
+  int getIndex(int x, int y);
+  CRGB *getLeds() { return _leds; }
+  void setupLeds();
+
+ private:
+  int _width;
+  int _height;
+  uint8_t _pin;
+  DCTLFormat _format = VERTICAL;
+  CRGB *_leds;
 };
 
 #endif  // DISPLAYCTL_H
