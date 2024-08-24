@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
 #include "DisplayAssembly.hpp"
-#include "background.h"
+#include "background.hpp"
 
 void matriceRgb(DisplayAssembly *display, int mode) {
   const CRGB rgb[] = {CRGB::Red,  CRGB::Yellow, CRGB::Green,

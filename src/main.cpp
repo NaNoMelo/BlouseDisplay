@@ -6,8 +6,8 @@
 #include "Debouncer.hpp"
 #include "DisplayAssembly.hpp"
 #include "DisplayCTL.hpp"
-#include "background.h"
-#include "overlay.h"
+#include "background.hpp"
+#include "overlay.hpp"
 
 Preferences preferences;
 DisplayAssembly display;
