@@ -38,8 +38,8 @@ void brightnessCallback(char *message, char *topic) {
   }
 }
 
-void ledsCallback(char *message, char *topic) {
-  // parse topic
+void ledCallback(char *message, char *topic) {
+  // parse topic for coords
   Serial.print("Topic: ");
   Serial.println(topic);
   char *base = (char *)"blouse/leds/";
@@ -47,31 +47,77 @@ void ledsCallback(char *message, char *topic) {
     base++;
     topic++;
   }
-  Serial.print("topic: ");
-  Serial.println(topic);
   char *char_x = strtok(topic, "/");
   char *char_y = strtok(NULL, "/");
-
-  // parse message
-  Serial.print("Received: ");
-  Serial.println(message);
-  JsonDocument color;
-  DeserializationError error = deserializeJson(color, message);
-  if (error) {
-    Serial.print(F("deserializeJson() failed: "));
-    Serial.println(error.f_str());
-    return;
-  }
-
-  // set pixel
   int x = atoi(char_x);
   int y = atoi(char_y);
   if (x < mqttDisplay->getMinX() || x > mqttDisplay->getMaxX() ||
       y < mqttDisplay->getMinY() || y > mqttDisplay->getMaxY()) {
     return;
   }
-  mqttDisplay->setPixel(x, y, CRGB(color["R"], color["G"], color["B"]));
+
+  // decode color
+  Serial.print("Received: ");
+  Serial.println(message);
+  JsonDocument color;
+  switch (*message) {
+    case '#':
+      message++;
+      mqttDisplay->setPixel(x, y, CRGB(std::stoi(message, 0, 16)));
+      break;
+    case '{':
+      DeserializationError error = deserializeJson(color, message);
+      if (error) {
+        Serial.print(F("deserializeJson() failed: "));
+        Serial.println(error.f_str());
+        return;
+      }
+      if (color["R"] && color["G"] && color["B"]) {
+        mqttDisplay->setPixel(x, y, CRGB(color["R"], color["G"], color["B"]));
+      } else if (color["H"] && color["S"] && color["V"]) {
+        mqttDisplay->setPixel(x, y, CHSV(color["H"], color["S"], color["V"]));
+      } else {
+        Serial.println("Invalid color format");
+      }
+      break;
+
+    default:
+      break;
+  }
 };
+
+void ledsCallback(char *message, char *topic) {
+  JsonDocument messageJson;
+  DeserializationError error = deserializeJson(messageJson, message);
+  if (error) {
+    Serial.print(F("deserializeJson() failed: "));
+    Serial.println(error.f_str());
+    return;
+  }
+
+  JsonArray leds = messageJson["leds"].as<JsonArray>();
+  for (int i = 0; i < leds.size(); i++) {
+    int x = leds[i]["x"];
+    int y = leds[i]["y"];
+    if (x < mqttDisplay->getMinX() || x > mqttDisplay->getMaxX() ||
+        y < mqttDisplay->getMinY() || y > mqttDisplay->getMaxY()) {
+      continue;
+    }
+    if (leds[i]["color"]) {
+      char *color = leds[i]["color"].as<char *>();
+      if (*color == '#') color++;
+      mqttDisplay->setPixel(x, y, CRGB(std::stoi(color, 0, 16)));
+    } else if (leds[i]["R"] && leds[i]["G"] && leds[i]["B"]) {
+      mqttDisplay->setPixel(x, y,
+                            CRGB(leds[i]["R"], leds[i]["G"], leds[i]["B"]));
+    } else if (leds[i]["H"] && leds[i]["S"] && leds[i]["V"]) {
+      mqttDisplay->setPixel(x, y,
+                            CHSV(leds[i]["H"], leds[i]["S"], leds[i]["V"]));
+    } else {
+      Serial.println("Invalid color format");
+    }
+  }
+}
 
 void setupMqtt(MQTTClient *mqttClient, DisplayAssembly *disp, short *bg,
                short *brightness) {
@@ -80,7 +126,8 @@ void setupMqtt(MQTTClient *mqttClient, DisplayAssembly *disp, short *bg,
   background = bg;
   bright = brightness;
 
-  mqttClient->subscribe((char *)"blouse/leds/#", ledsCallback);
   mqttClient->subscribe((char *)"blouse/mode", modeCallback);
   mqttClient->subscribe((char *)"blouse/brightness", brightnessCallback);
+  mqttClient->subscribe((char *)"blouse/leds/#", ledCallback);
+  mqttClient->subscribe((char *)"blouse/leds", ledsCallback);
 }

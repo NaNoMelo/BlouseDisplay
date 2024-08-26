@@ -3,6 +3,8 @@
 
 #include <ArduinoJson.h>
 
+#include <string>
+
 #include "DisplayAssembly.hpp"
 #include "MQTTClient.hpp"
 #include "env.h"
