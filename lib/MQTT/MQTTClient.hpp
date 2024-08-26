@@ -22,7 +22,8 @@ class MQTTClient {
  public:
   MQTTClient() = delete;
   MQTTClient(const char *wifiSsid, const char *wifiPass, const char *mqttHost,
-             const char *mqttId, const char *mqttUser, const char *mqttPass);
+             const int mqttPort, const char *mqttId, const char *mqttUser,
+             const char *mqttPass);
   ~MQTTClient() {
     if (subs != NULL) delete subs;
   };
@@ -36,6 +37,7 @@ class MQTTClient {
  private:
   const char *_wifiSsid, *_wifiPass;
   const char *_mqttHost, *_mqttId, *_mqttUser, *_mqttPass;
+  const int _mqttPort = 1883;
 
   WiFiClient wifiClient;
   PubSubClient mqttClient;

@@ -7,7 +7,6 @@
 
 #include "DisplayAssembly.hpp"
 #include "MQTTClient.hpp"
-#include "env.h"
 
 void modeCallback(char *message, char *topic);
 

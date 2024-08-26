@@ -2,17 +2,19 @@
 #include "MQTTClient.hpp"
 
 MQTTClient::MQTTClient(const char *wifiSsid, const char *wifiPass,
-                       const char *mqttHost, const char *mqttId,
-                       const char *mqttUser, const char *mqttPass)
+                       const char *mqttHost, const int mqttPort,
+                       const char *mqttId, const char *mqttUser,
+                       const char *mqttPass)
     : _wifiSsid(wifiSsid),
       _wifiPass(wifiPass),
       _mqttHost(mqttHost),
+      _mqttPort(mqttPort),
       _mqttId(mqttId),
       _mqttUser(mqttUser),
       _mqttPass(mqttPass) {
   setupWifi();
   mqttClient.setClient(wifiClient);
-  mqttClient.setServer(_mqttHost, 1883);
+  mqttClient.setServer(_mqttHost, _mqttPort);
   mqttClient.setCallback(
       [this](char *topic, byte *payload, unsigned int length) {
         this->handleMessage(topic, payload, length);

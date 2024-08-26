@@ -8,6 +8,7 @@
 #include "DisplayCTL.hpp"
 #include "MQTTClient.hpp"
 #include "background.hpp"
+#include "env.h"
 #include "mqtt.hpp"
 #include "overlay.hpp"
 
@@ -44,7 +45,7 @@ void setup() {
   pinMode(BG_BUTTON_PIN, INPUT_PULLUP);
   pinMode(BRIGHTNESS_BUTTON_PIN, INPUT_PULLUP);
 
-  mqttClient = new MQTTClient(WIFI_SSID, WIFI_PASS, MQTT_HOST, "blouse",
+  mqttClient = new MQTTClient(WIFI_SSID, WIFI_PASS, MQTT_HOST, MQTT_PORT,"blouse",
                               MQTT_USER, MQTT_PASS);
   setupMqtt(mqttClient, display, &bg, &brightness);
 }
