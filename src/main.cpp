@@ -29,7 +29,7 @@ void setup() {
 
   preferences.begin("display");
   brightness = preferences.getShort("brightness", 1);
-  preferences.getShort("bg", 1);
+  bg = preferences.getShort("bg", 1);
 
   display = new DisplayAssembly();
   display->addController(32, 8, 27, VERTICAL, 0, 0);
@@ -60,7 +60,7 @@ void loop() {
     bg = (bg + 1) % 4;
   }
   if (bg_button.isRisingEdge()) {
-    // preferences.putShort("bg", bg);
+    preferences.putShort("bg", bg);
   }
 
   brightness_button.read();
@@ -68,7 +68,7 @@ void loop() {
     brightness = !brightness;
   }
   if (brightness_button.isRisingEdge()) {
-    // preferences.putShort("brightness", brightness);
+    preferences.putShort("brightness", brightness);
   }
 
   static long lastFrame = 0;
