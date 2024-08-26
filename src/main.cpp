@@ -6,11 +6,17 @@
 #include "Debouncer.hpp"
 #include "DisplayAssembly.hpp"
 #include "DisplayCTL.hpp"
+#include "MQTTClient.hpp"
 #include "background.hpp"
+#include "mqtt.hpp"
 #include "overlay.hpp"
 
 Preferences preferences;
-DisplayAssembly display;
+DisplayAssembly *display;
+MQTTClient *mqttClient;
+
+short bg = 1;
+short brightness = 1;
 
 #define FPS 30
 
@@ -19,39 +25,50 @@ DisplayAssembly display;
 
 void setup() {
   Serial.begin(115200);
+  Serial.println("Starting...");
+
   preferences.begin("display");
-  display.addController(32, 8, 27, VERTICAL, 0, 0);
-  display.addController(32, 8, 25, VERTICAL, 0, 8);
+  brightness = preferences.getShort("brightness", 1);
+  preferences.getShort("bg", 1);
+
+  display = new DisplayAssembly();
+  display->addController(32, 8, 27, VERTICAL, 0, 0);
+  display->addController(32, 8, 25, VERTICAL, 0, 8);
 
   FastLED.setMaxPowerInVoltsAndMilliamps(5, 1000);
-  FastLED.setMaxRefreshRate(600);
-  FastLED.setBrightness(1);
+  FastLED.setMaxRefreshRate(60);
+  brightness ? FastLED.setBrightness(1) : FastLED.setBrightness(16);
+  FastLED.show();
+
   srand(time(NULL));
   pinMode(BG_BUTTON_PIN, INPUT_PULLUP);
   pinMode(BRIGHTNESS_BUTTON_PIN, INPUT_PULLUP);
-  FastLED.show();
+
+  mqttClient = new MQTTClient(WIFI_SSID, WIFI_PASS, MQTT_HOST, "blouse",
+                              MQTT_USER, MQTT_PASS);
+  setupMqtt(mqttClient, display, &bg, &brightness);
 }
 
 Debouncer bg_button(BG_BUTTON_PIN);
 Debouncer brightness_button(BRIGHTNESS_BUTTON_PIN);
 void loop() {
-  static short bg = preferences.getShort("bg", 1);
+  mqttClient->loop();
+  brightness ? FastLED.setBrightness(1) : FastLED.setBrightness(16);
+
   bg_button.read();
   if (bg_button.isFallingEdge()) {
     bg = (bg + 1) % 4;
   }
   if (bg_button.isRisingEdge()) {
-    preferences.putShort("bg", bg);
+    // preferences.putShort("bg", bg);
   }
 
-  static short brightness = preferences.getShort("brightness", 1);
   brightness_button.read();
   if (brightness_button.isFallingEdge()) {
     brightness = !brightness;
-    brightness ? FastLED.setBrightness(1) : FastLED.setBrightness(16);
   }
   if (brightness_button.isRisingEdge()) {
-    preferences.putShort("brightness", brightness);
+    // preferences.putShort("brightness", brightness);
   }
 
   static long lastFrame = 0;
@@ -60,21 +77,26 @@ void loop() {
 
     switch (bg) {
       case 0:
-        matriceRgb(&display, brightness);
+        matriceRgb(display, brightness);
+        NaNoverlay(display, 3, 4);
         break;
       case 1:
-        matrix(&display);
+        matrix(display);
+        NaNoverlay(display, 3, 4);
         break;
       case 2:
-        fire(&display);
+        fire(display);
+        NaNoverlay(display, 3, 4);
         break;
       case 3:
-        epilepsie(&display);
+        epilepsie(display);
+        NaNoverlay(display, 3, 4);
         break;
+      case 4:
+
       default:
         break;
     }
-    NaNoverlay(&display, 3, 4);
     FastLED.show();
   }
   /*// TEST SEGMENT ---------------------------------
