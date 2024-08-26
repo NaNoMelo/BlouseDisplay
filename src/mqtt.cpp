@@ -80,9 +80,6 @@ void ledCallback(char *message, char *topic) {
         Serial.println("Invalid color format");
       }
       break;
-
-    default:
-      break;
   }
 };
 
@@ -95,24 +92,46 @@ void ledsCallback(char *message, char *topic) {
     return;
   }
 
-  JsonArray leds = messageJson["leds"].as<JsonArray>();
-  for (int i = 0; i < leds.size(); i++) {
-    int x = leds[i]["x"];
-    int y = leds[i]["y"];
+  if (messageJson["leds"]) {
+    JsonArray leds = messageJson["leds"].as<JsonArray>();
+    for (int i = 0; i < leds.size(); i++) {
+      int x = leds[i]["x"];
+      int y = leds[i]["y"];
+      if (x < mqttDisplay->getMinX() || x > mqttDisplay->getMaxX() ||
+          y < mqttDisplay->getMinY() || y > mqttDisplay->getMaxY()) {
+        continue;
+      }
+      if (leds[i]["color"]) {
+        const char *color = leds[i]["color"].as<const char *>();
+        if (*color == '#') color++;
+        mqttDisplay->setPixel(x, y, CRGB(std::stoi(color, 0, 16)));
+      } else if (leds[i]["R"] && leds[i]["G"] && leds[i]["B"]) {
+        mqttDisplay->setPixel(x, y,
+                              CRGB(leds[i]["R"], leds[i]["G"], leds[i]["B"]));
+      } else if (leds[i]["H"] && leds[i]["S"] && leds[i]["V"]) {
+        mqttDisplay->setPixel(x, y,
+                              CHSV(leds[i]["H"], leds[i]["S"], leds[i]["V"]));
+      } else {
+        Serial.println("Invalid color format");
+      }
+    }
+  } else {
+    int x = messageJson["x"];
+    int y = messageJson["y"];
     if (x < mqttDisplay->getMinX() || x > mqttDisplay->getMaxX() ||
         y < mqttDisplay->getMinY() || y > mqttDisplay->getMaxY()) {
-      continue;
+      return;
     }
-    if (leds[i]["color"]) {
-      char *color = leds[i]["color"].as<char *>();
+    if (messageJson["color"]) {
+      const char *color = messageJson["color"].as<const char *>();
       if (*color == '#') color++;
       mqttDisplay->setPixel(x, y, CRGB(std::stoi(color, 0, 16)));
-    } else if (leds[i]["R"] && leds[i]["G"] && leds[i]["B"]) {
-      mqttDisplay->setPixel(x, y,
-                            CRGB(leds[i]["R"], leds[i]["G"], leds[i]["B"]));
-    } else if (leds[i]["H"] && leds[i]["S"] && leds[i]["V"]) {
-      mqttDisplay->setPixel(x, y,
-                            CHSV(leds[i]["H"], leds[i]["S"], leds[i]["V"]));
+    } else if (messageJson["R"] && messageJson["G"] && messageJson["B"]) {
+      mqttDisplay->setPixel(
+          x, y, CRGB(messageJson["R"], messageJson["G"], messageJson["B"]));
+    } else if (messageJson["H"] && messageJson["S"] && messageJson["V"]) {
+      mqttDisplay->setPixel(
+          x, y, CHSV(messageJson["H"], messageJson["S"], messageJson["V"]));
     } else {
       Serial.println("Invalid color format");
     }
