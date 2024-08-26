@@ -4,29 +4,34 @@
 #include <PubSubClient.h>
 #include <WiFi.h>
 
-using namespace std;
-
 struct MQTTSub {
-  const char *topic;
-  function<void(char*)> callback;
+  char *topic;
+  std::function<void(char *, char *)> callback;
   MQTTSub *next = NULL;
 
-  MQTTSub(const char *topic, function<void(char*)> callback)
-      : topic(topic), callback(callback) {}
+  MQTTSub(char *topic, std::function<void(char *, char *)> callback,
+          MQTTSub *next)
+      : topic(topic), callback(callback), next(next) {};
+
+  ~MQTTSub() {
+    if (next != NULL) delete next;
+  }
 };
 
 class MQTTClient {
  public:
   MQTTClient() = delete;
   MQTTClient(const char *wifiSsid, const char *wifiPass, const char *mqttHost,
-             const char *mqttId, const char *mqttUser = "",
-             const char *mqttPass = "");
-  ~MQTTClient() = default;
+             const char *mqttId, const char *mqttUser, const char *mqttPass);
+  ~MQTTClient() {
+    if (subs != NULL) delete subs;
+  };
 
   MQTTClient(const MQTTClient &) = delete;
   MQTTClient &operator=(const MQTTClient &) = delete;
 
   void loop();
+  void subscribe(char *topic, std::function<void(char *, char *)> callback);
 
  private:
   const char *_wifiSsid, *_wifiPass;
@@ -41,11 +46,10 @@ class MQTTClient {
   void checkWifi(bool forceReconnect = false, bool setup = false);
 
   void mqttConnect();
-  void mqttSubscribe();
-  void mqttSubscribe(const char *topic, function<void(char*)> &callback);
+  void subscribe();
 
   void handleMessage(char *topic, byte *payload, unsigned int length);
-  bool topicMatch(const char *topic, const char *sub);
+  bool topicMatch(char *topic, char *sub);
 };
 
 #endif  // MQTT_CLIENT_H

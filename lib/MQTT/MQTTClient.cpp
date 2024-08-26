@@ -3,7 +3,7 @@
 
 MQTTClient::MQTTClient(const char *wifiSsid, const char *wifiPass,
                        const char *mqttHost, const char *mqttId,
-                       const char *mqttUser = "", const char *mqttPass = "")
+                       const char *mqttUser, const char *mqttPass)
     : _wifiSsid(wifiSsid),
       _wifiPass(wifiPass),
       _mqttHost(mqttHost),
@@ -23,10 +23,12 @@ void MQTTClient::loop() {
   // Wi-Fi Handling
   static bool lastWifiStatus = false;
   bool wifiStatus = WiFi.status() == WL_CONNECTED;
+  static bool connectingMqtt = false;
 
   if (wifiStatus != lastWifiStatus) {
     lastWifiStatus = wifiStatus;
     checkWifi(!wifiStatus);
+    connectingMqtt = wifiStatus;
   } else if (!wifiStatus) {
     checkWifi();
     return;
@@ -36,7 +38,6 @@ void MQTTClient::loop() {
   static bool lastMqttStatus = false;
   static unsigned long lastMqttStart = 0;
   bool mqttStatus = mqttClient.connected();
-  static bool connectingMqtt = false;
 
   if (mqttStatus != lastMqttStatus) {
     lastMqttStatus = mqttStatus;
@@ -48,7 +49,7 @@ void MQTTClient::loop() {
       connectingMqtt = false;
     }
   } else if (!mqttStatus && connectingMqtt) {
-    static long lastMqttAttempt = 0;
+    static unsigned long lastMqttAttempt = 0;
     if (millis() - lastMqttAttempt > 5000) {
       lastMqttAttempt = millis();
       mqttConnect();
@@ -100,7 +101,7 @@ void MQTTClient::mqttConnect() {
   Serial.print("Attempting MQTT connection...");
   if (mqttClient.connect(_mqttId, _mqttUser, _mqttPass)) {
     Serial.println("connected");
-    mqttSubscribe();
+    subscribe();
   } else {
     Serial.print("failed, rc=");
     Serial.print(mqttClient.state());
@@ -108,17 +109,18 @@ void MQTTClient::mqttConnect() {
   }
 }
 
-void MQTTClient::mqttSubscribe() {
+void MQTTClient::subscribe() {
   if (!mqttClient.connected()) return;
   MQTTSub *sub = subs;
   while (sub != NULL) {
     mqttClient.subscribe(sub->topic);
+    sub = sub->next;
   }
 }
 
-void MQTTClient::mqttSubscribe(const char *topic,
-                               function<void(char *)> &callback) {
-  subs = new MQTTSub(topic, callback);
+void MQTTClient::subscribe(char *topic,
+                           std::function<void(char *, char *)> callback) {
+  subs = new MQTTSub(topic, callback, subs);
   if (!mqttClient.connected()) return;
   mqttClient.subscribe(topic);
 }
@@ -139,13 +141,13 @@ void MQTTClient::handleMessage(char *topic, byte *payload,
   MQTTSub *sub = subs;
   while (sub != NULL) {
     if (topicMatch(topic, sub->topic)) {
-      sub->callback((char *)payload);
+      sub->callback((char *)message, (char *)topic);
     }
     sub = sub->next;
   }
 }
 
-bool MQTTClient::topicMatch(const char *topic, const char *sub) {
+bool MQTTClient::topicMatch(char *topic, char *sub) {
   while (*topic && *sub) {
     if (*sub == '+') {
       sub++;
