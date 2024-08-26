@@ -71,6 +71,12 @@ class DisplayAssembly {
 
   int getWidth() { return _width; }
   int getHeight() { return _height; }
+
+  int getMinX() { return _min_x; }
+  int getMinY() { return _min_y; }
+  int getMaxX() { return _max_x; }
+  int getMaxY() { return _max_y; }
+
   CRGB getPixel(int x, int y);
 
   void setPixel(int x, int y, CRGB color);
