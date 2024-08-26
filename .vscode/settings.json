@@ -3,7 +3,8 @@
     "random": "cpp",
     "new": "cpp",
     "cmath": "cpp",
-    "string_view": "cpp"
+    "string_view": "cpp",
+    "functional": "cpp"
   },
   "C_Cpp.errorSquiggles": "enabled"
 }

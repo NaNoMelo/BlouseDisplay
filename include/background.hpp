@@ -3,7 +3,6 @@
 
 #include <Arduino.h>
 #include <FastLED.h>
-#include <stdlib.h>
 
 #include "DisplayAssembly.hpp"
 
