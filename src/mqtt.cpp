@@ -4,6 +4,8 @@ MQTTClient *client;
 
 DisplayAssembly *mqttDisplay;
 
+Preferences *preference;
+
 short *background;
 short *bright;
 
@@ -24,6 +26,7 @@ void modeCallback(char *message, char *topic) {
     *background = 4;
     FastLED.clear(true);
   }
+  preference->putShort("bg", *background);
 }
 
 void brightnessCallback(char *message, char *topic) {
@@ -36,6 +39,7 @@ void brightnessCallback(char *message, char *topic) {
   } else if (strcmp(message, "off") == 0) {
     *bright = 0;
   }
+  preference->putShort("brightness", *bright);
 }
 
 void ledCallback(char *message, char *topic) {
@@ -138,10 +142,11 @@ void ledsCallback(char *message, char *topic) {
   }
 }
 
-void setupMqtt(MQTTClient *mqttClient, DisplayAssembly *disp, short *bg,
-               short *brightness) {
+void setupMqtt(MQTTClient *mqttClient, DisplayAssembly *disp,
+               Preferences *preferences, short *bg, short *brightness) {
   client = mqttClient;
   mqttDisplay = disp;
+  preference = preferences;
   background = bg;
   bright = brightness;
 

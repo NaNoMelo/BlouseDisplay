@@ -45,9 +45,9 @@ void setup() {
   pinMode(BG_BUTTON_PIN, INPUT_PULLUP);
   pinMode(BRIGHTNESS_BUTTON_PIN, INPUT_PULLUP);
 
-  mqttClient = new MQTTClient(WIFI_SSID, WIFI_PASS, MQTT_HOST, MQTT_PORT,"blouse",
-                              MQTT_USER, MQTT_PASS);
-  setupMqtt(mqttClient, display, &bg, &brightness);
+  mqttClient = new MQTTClient(WIFI_SSID, WIFI_PASS, MQTT_HOST, MQTT_PORT,
+                              "blouse", MQTT_USER, MQTT_PASS);
+  setupMqtt(mqttClient, display, &preferences, &bg, &brightness);
 }
 
 Debouncer bg_button(BG_BUTTON_PIN);
