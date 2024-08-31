@@ -38,7 +38,7 @@ void setup() {
 
   FastLED.setMaxPowerInVoltsAndMilliamps(5, 1000);
   FastLED.setMaxRefreshRate(60);
-  brightness ? FastLED.setBrightness(1) : FastLED.setBrightness(16);
+  FastLED.setBrightness(brightness);
   FastLED.show();
 
   srand(time(NULL));
@@ -54,7 +54,7 @@ Debouncer bg_button(BG_BUTTON_PIN);
 Debouncer brightness_button(BRIGHTNESS_BUTTON_PIN);
 void loop() {
   mqttClient->loop();
-  brightness ? FastLED.setBrightness(1) : FastLED.setBrightness(16);
+  FastLED.setBrightness(brightness);
 
   bg_button.read();
   if (bg_button.isFallingEdge()) {
@@ -66,7 +66,7 @@ void loop() {
 
   brightness_button.read();
   if (brightness_button.isFallingEdge()) {
-    brightness = !brightness;
+    brightness = brightness > 8 ? 1 : 16;
   }
   if (brightness_button.isRisingEdge()) {
     preferences.putShort("brightness", brightness);

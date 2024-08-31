@@ -1,5 +1,7 @@
 #include "mqtt.hpp"
 
+#include "overlay.hpp"
+
 MQTTClient *client;
 
 DisplayAssembly *mqttDisplay;
@@ -34,11 +36,7 @@ void brightnessCallback(char *message, char *topic) {
   Serial.println(topic);
   Serial.print("Received: ");
   Serial.println(message);
-  if (strcmp(message, "on") == 0) {
-    *bright = 1;
-  } else if (strcmp(message, "off") == 0) {
-    *bright = 0;
-  }
+  *bright = atoi(message);
   preference->putShort("brightness", *bright);
 }
 
@@ -142,6 +140,8 @@ void ledsCallback(char *message, char *topic) {
   }
 }
 
+void nanoCallback(char *message, char *topic) { NaNoverlay(mqttDisplay, 3, 4); }
+
 void setupMqtt(MQTTClient *mqttClient, DisplayAssembly *disp,
                Preferences *preferences, short *bg, short *brightness) {
   client = mqttClient;
@@ -154,4 +154,5 @@ void setupMqtt(MQTTClient *mqttClient, DisplayAssembly *disp,
   mqttClient->subscribe((char *)"blouse/brightness", brightnessCallback);
   mqttClient->subscribe((char *)"blouse/leds/#", ledCallback);
   mqttClient->subscribe((char *)"blouse/leds", ledsCallback);
+  mqttClient->subscribe((char *)"blouse/nanoverlay", nanoCallback);
 }
