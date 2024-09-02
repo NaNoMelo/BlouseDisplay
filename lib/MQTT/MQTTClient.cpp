@@ -127,6 +127,11 @@ void MQTTClient::subscribe(char *topic,
   mqttClient.subscribe(topic);
 }
 
+void MQTTClient::publish(char *topic, char *message, boolean retained) {
+  if (!mqttClient.connected()) return;
+  mqttClient.publish(topic, message, retained);
+}
+
 void MQTTClient::handleMessage(char *topic, byte *payload,
                                unsigned int length) {
   Serial.print("Message arrived [");

@@ -34,6 +34,8 @@ class MQTTClient {
   void loop();
   void subscribe(char *topic, std::function<void(char *, char *)> callback);
 
+  void publish(char *topic, char *message, boolean retained = false);
+
  private:
   const char *_wifiSsid, *_wifiPass;
   const char *_mqttHost, *_mqttId, *_mqttUser, *_mqttPass;

@@ -142,6 +142,26 @@ void ledsCallback(char *message, char *topic) {
 
 void nanoCallback(char *message, char *topic) { NaNoverlay(mqttDisplay, 3, 4); }
 
+void clearCallback(char *message, char *topic) {
+  for (int i = 0; i < mqttDisplay->getWidth(); i++) {
+    for (int j = 0; j < mqttDisplay->getHeight(); j++) {
+      std::string topic =
+          "blouse/leds/" + std::to_string(i) + "/" + std::to_string(j);
+      client->publish((char *)topic.c_str(), (char *)"#000000", true);
+    }
+  }
+}
+
+void fillCallback(char *message, char *topic) {
+  for (int i = 0; i < mqttDisplay->getWidth(); i++) {
+    for (int j = 0; j < mqttDisplay->getHeight(); j++) {
+      std::string topic =
+          "blouse/leds/" + std::to_string(i) + "/" + std::to_string(j);
+      client->publish((char *)topic.c_str(), message, true);
+    }
+  }
+}
+
 void setupMqtt(MQTTClient *mqttClient, DisplayAssembly *disp,
                Preferences *preferences, short *bg, short *brightness) {
   client = mqttClient;
@@ -155,4 +175,6 @@ void setupMqtt(MQTTClient *mqttClient, DisplayAssembly *disp,
   mqttClient->subscribe((char *)"blouse/leds/#", ledCallback);
   mqttClient->subscribe((char *)"blouse/leds", ledsCallback);
   mqttClient->subscribe((char *)"blouse/nanoverlay", nanoCallback);
+  mqttClient->subscribe((char *)"blouse/mqtt/clear", clearCallback);
+  mqttClient->subscribe((char *)"blouse/mqtt/fill", fillCallback);
 }
