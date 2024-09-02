@@ -147,7 +147,7 @@ void clearCallback(char *message, char *topic) {
     for (int j = 0; j < mqttDisplay->getHeight(); j++) {
       std::string topic =
           "blouse/leds/" + std::to_string(i) + "/" + std::to_string(j);
-      client->publish((char *)topic.c_str(), (char *)"#000000", true);
+      client->publish((char *)topic.c_str(), (char *)'\0', true);
     }
   }
 }
