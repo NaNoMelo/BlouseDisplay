@@ -127,6 +127,18 @@ void MQTTClient::subscribe(char *topic,
   mqttClient.subscribe(topic);
 }
 
+void MQTTClient::reSubscribe(char *topic) {
+  if (!mqttClient.connected()) return;
+  MQTTSub *sub = subs;
+  while (sub != NULL) {
+    if (strcmp(sub->topic, topic) == 0) {
+      mqttClient.subscribe(topic);
+      return;
+    }
+    sub = sub->next;
+  }
+}
+
 void MQTTClient::publish(char *topic, char *message, boolean retained) {
   if (!mqttClient.connected()) return;
   mqttClient.publish(topic, message, retained);

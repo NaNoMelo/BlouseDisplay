@@ -34,6 +34,8 @@ class MQTTClient {
   void loop();
   void subscribe(char *topic, std::function<void(char *, char *)> callback);
 
+  void reSubscribe(char *topic);
+
   void publish(char *topic, char *message, boolean retained = false);
 
  private:

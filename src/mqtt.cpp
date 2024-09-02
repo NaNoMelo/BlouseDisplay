@@ -27,6 +27,7 @@ void modeCallback(char *message, char *topic) {
   } else if (strcmp(message, "mqtt") == 0) {
     *background = 4;
     FastLED.clear(true);
+    client->reSubscribe((char *)"blouse/leds/#");
   }
   preference->putShort("bg", *background);
 }
