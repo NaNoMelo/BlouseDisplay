@@ -139,6 +139,8 @@ void MQTTClient::reSubscribe(char *topic) {
   }
 }
 
+// TODO ability to enable and disable topic subscriptions
+
 void MQTTClient::publish(char *topic, char *message, boolean retained) {
   if (!mqttClient.connected()) return;
   mqttClient.publish(topic, message, retained);
