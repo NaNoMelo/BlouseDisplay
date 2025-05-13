@@ -33,11 +33,11 @@ int DisplayCTL::getIndex(int x, int y) {
  */
 void DisplayCTL::setupLeds() {
   switch (_pin) {
-    case 25:
-      FastLED.addLeds<NEOPIXEL, 25>(_leds, _width * _height);
+    case 3:
+      FastLED.addLeds<NEOPIXEL, 3>(_leds, _width * _height);
       break;
-    case 27:
-      FastLED.addLeds<NEOPIXEL, 27>(_leds, _width * _height);
+    case 4:
+      FastLED.addLeds<NEOPIXEL, 4>(_leds, _width * _height);
       break;
     default:
       break;

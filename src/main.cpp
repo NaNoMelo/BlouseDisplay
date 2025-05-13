@@ -33,8 +33,8 @@ void setup() {
   bg = preferences.getShort("bg", 1);
 
   display = new DisplayAssembly();
-  display->addController(32, 8, 27, VERTICAL, 0, 0);
-  display->addController(32, 8, 25, VERTICAL, 0, 8);
+  display->addController(8, 8, 3, VERTICAL, 0, 0);
+  display->addController(8, 8, 4, VERTICAL, 8, 0);
 
   FastLED.setMaxPowerInVoltsAndMilliamps(5, 1000);
   FastLED.setMaxRefreshRate(60);
@@ -53,7 +53,7 @@ void setup() {
 Debouncer bg_button(BG_BUTTON_PIN);
 Debouncer brightness_button(BRIGHTNESS_BUTTON_PIN);
 void loop() {
-  mqttClient->loop();
+  /*mqttClient->loop();
   FastLED.setBrightness(brightness);
 
   bg_button.read();
@@ -99,13 +99,13 @@ void loop() {
         break;
     }
     FastLED.show();
-  }
-  /*// TEST SEGMENT ---------------------------------
+  }*/
+  // TEST SEGMENT ---------------------------------
   static unsigned short hue = 0;
   long time = millis();
-  for (int i = 0; i < display.getWidth(); i++) {
-    for (int j = 0; j < display.getHeight(); j++) {
-      display.setPixel(i, j, CHSV((hue + i + j) % 256, 255, 255));
+  for (int i = 0; i < display->getWidth(); i++) {
+    for (int j = 0; j < display->getHeight(); j++) {
+      display->setPixel(i, j, CHSV((hue + i + j) % 256, 255, 255));
     }
   }
   hue++;
@@ -113,5 +113,5 @@ void loop() {
   Serial.print("time:");
   Serial.println(millis() - time);
   delay(50);
-  */// TEST SEGMENT ---------------------------------
+  // TEST SEGMENT ---------------------------------
 }
